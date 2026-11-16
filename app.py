@@ -4,11 +4,12 @@ MahaVarta: Marathi News Classification & Summarization Web Application
 Gradio dashboard supporting:
   - Tab 1: Overview (Article stats, predicted category badge, sentiment, key entities, dominant topic, summary)
   - Tab 2: Classification (Top 3 categories with category scores, trained SVM)
-  - Tab 3: Summary (Extractive TextRank summary + Stage 8 mT5 notice)
-  - Tab 4: Sentiment (Sentiment label + model prediction score, 3 class scores, news caveat note)
-  - Tab 5: Entities (gr.HighlightedText in context + grouped entities by category)
-  - Tab 6: Topics (Discovered topics, top keywords, topic weights via LDA)
-  - Tab 7: Preprocessing (CO1 demonstration: original, normalized, cleaned, tokens, TF-IDF)
+  - Tab 3: Summary (Extractive TextRank summary + Stage 8 mT5 abstractive summary)
+  - Tab 4: News brief (Qwen3 prompt-engineered news brief + prompt variants comparison)
+  - Tab 5: Sentiment (Sentiment label + model prediction score, 3 class scores, news caveat note)
+  - Tab 6: Entities (gr.HighlightedText in context + grouped entities by category)
+  - Tab 7: Topics (Discovered topics, top keywords, topic weights via LDA)
+  - Tab 8: Preprocessing (CO1 demonstration: original, normalized, cleaned, tokens, TF-IDF)
 
 Authors: Vishal Gorakh Shende & Gufran Shah
 Course: Natural Language Processing, MIT Academy of Engineering, Alandi, Pune
@@ -25,10 +26,22 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from src.preprocessing import preprocess, read_uploaded_txt
 from src.classification import load as load_classifier, predict as predict_category, LABEL_TO_MARATHI
-from src.summarization import textrank_summary, split_sentences
+from src.summarization import (
+    textrank_summary,
+    split_sentences,
+    summarize_auto,
+    mt5_summary,
+    chunked_mt5_summary,
+)
 from src.sentiment import predict as predict_sentiment
 from src.ner import extract_entities, group_by_label
 from src.topic_modeling import load_lda_model, article_topics, preprocess_for_lda
+from src.prompting import (
+    generate_brief,
+    compare_prompts,
+    has_three_numbered_items,
+    devanagari_ratio,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -405,6 +418,116 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
     )
 
 
+def handle_mt5_summary(
+    text: str,
+    max_length: int,
+    min_length: int,
+    num_beams: int,
+    length_penalty: float,
+    no_repeat_ngram_size: int,
+):
+    """
+    Generate an abstractive Marathi summary using csebuetnlp/mT5_multilingual_XLSum.
+    Uses chunked summarisation for articles longer than 512 tokens.
+    """
+    if not text or not text.strip():
+        return (
+            "कृपया विश्लेषणासाठी बातमीचा मजकूर प्रविष्ट करा (Please input article text).",
+            "⚠️ मजकूर रिक्त आहे.",
+        )
+
+    try:
+        logger.info("Starting mT5 abstractive summarisation...")
+        res = summarize_auto(
+            text,
+            max_length=int(max_length),
+            min_length=int(min_length),
+            num_beams=int(num_beams),
+            length_penalty=float(length_penalty),
+            no_repeat_ngram_size=int(no_repeat_ngram_size),
+        )
+
+        summary = res.get("summary", "")
+        tokens = res.get("input_tokens", 0)
+        seconds = res.get("seconds", 0.0)
+        mode = res.get("mode", "single")
+        truncated = res.get("truncated", False)
+        num_chunks = res.get("num_chunks", 1)
+
+        warning_note = ""
+        if tokens > 512:
+            warning_note = f"\n\n> ⚠️ **Long article ({tokens} tokens > 512): using chunked summarisation ({num_chunks} chunks).**"
+        elif truncated:
+            warning_note = f"\n\n> ⚠️ **सूचना:** लेख ५१२ टोकन्सपेक्षा मोठा असल्याने ५१२ टोकन्सनंतरचा भाग कापला गेला."
+
+        status_info = f"""
+**📊 mT5 सारांश मेट्रिक्स (Summary Metrics):**
+- **इनपुट टोकन्स (Input Tokens):** `{tokens}`
+- **लागलेला वेळ (Time Taken):** `{seconds} सेकंद`
+- **पद्धती (Mode):** `{mode.capitalize()}` ({num_chunks} chunk(s))
+{warning_note}
+
+---
+*📢 **महत्त्वाची नोंद:** हा सारांश `csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे मशीन-निर्मित (machine-generated, may contain errors) आहे; यात भाषिक अथवा वस्तुस्थितीजन्य त्रुटी असण्याची शक्यता असू शकते.*
+"""
+        return summary, status_info
+    except Exception as e:
+        logger.error(f"mT5 generation error: {e}")
+        return (
+            f"mT5 सारांश तयार करताना त्रुटी आली: {str(e)}",
+            f"❌ त्रुटी (Error): {str(e)}",
+        )
+
+
+def handle_news_brief(text: str, prompt_variant: str):
+    """
+    Generate news brief using Qwen/Qwen3-0.6B with prompt engineering variants.
+    Keeps try/except isolation so any failure does not crash the application.
+    """
+    if not text or not text.strip():
+        empty_msg = "कृपया बातमीचा मजकूर प्रविष्ट करा (Please input article text)."
+        empty_badge = "⚠️ मजकूर रिक्त आहे."
+        return empty_msg, empty_badge, empty_msg, empty_badge, empty_msg, empty_badge
+
+    try:
+        logger.info(f"Generating news brief with variant: {prompt_variant}")
+
+        def format_card(res_item):
+            output_txt = res_item.get("output", "")
+            has_three = "✅ होय (Yes)" if has_three_numbered_items(output_txt) else "❌ नाही (No)"
+            dev = devanagari_ratio(output_txt) * 100
+            sec = res_item.get("seconds", 0.0)
+            words = len(output_txt.split())
+            badge = f"""**📊 उद्दिष्ट तपासणी (Objective Checks):**
+- **३ क्रमांकित मुद्दे (3 items):** {has_three}
+- **देवनागरी प्रमाण (Devanagari):** `{dev:.1f}%`
+- **शब्द संख्या (Words):** `{words}` | **वेळ:** `{sec}s`"""
+            return output_txt, badge
+
+        if prompt_variant == "Compare all three":
+            res_all = compare_prompts(text)
+            txt1, badge1 = format_card(res_all.get("zero_shot", {}))
+            txt2, badge2 = format_card(res_all.get("role_based", {}))
+            txt3, badge3 = format_card(res_all.get("role_constraints", {}))
+            return txt1, badge1, txt2, badge2, txt3, badge3
+        else:
+            res = generate_brief(text, prompt_key=prompt_variant, max_new_tokens=250)
+            out_txt, badge = format_card(res)
+            not_sel = "*(या पर्यायाची निवड केलेली नाही - Not selected)*"
+            not_sel_b = ""
+            if prompt_variant == "zero_shot":
+                return out_txt, badge, not_sel, not_sel_b, not_sel, not_sel_b
+            elif prompt_variant == "role_based":
+                return not_sel, not_sel_b, out_txt, badge, not_sel, not_sel_b
+            else:  # role_constraints
+                return not_sel, not_sel_b, not_sel, not_sel_b, out_txt, badge
+    except Exception as e:
+        logger.error(f"News brief generation error: {e}")
+        err_msg = f"Qwen3 बातमी संक्षेप तयार करताना त्रुटी आली: {str(e)}"
+        err_badge = f"❌ त्रुटी (Error): {str(e)}"
+        return err_msg, err_badge, err_msg, err_badge, err_msg, err_badge
+
+
 # ---------------------------------------------------------------------------
 # Gradio Blocks UI Construction
 # ---------------------------------------------------------------------------
@@ -498,25 +621,109 @@ def build_app():
                             """
                         )
 
-                    # Tab 3: Summary
+                    # Tab 3: Summary (Side-by-Side: TextRank & mT5)
                     with gr.Tab("📋 सारांश (Summary)"):
-                        gr.Markdown("### 📑 TextRank एक्स्ट्रॅक्टिव्ह सारांश (Extractive Summary)")
-                        summary_output = gr.Textbox(
-                            label="तयार केलेला सारांश (Generated Summary)",
-                            lines=6,
+                        gr.Markdown("### 📑 बातमीचा सारांश: एक्स्ट्रॅक्टिव्ह (TextRank) आणि ॲब्स्ट्रॅक्टिव्ह (mT5)")
+                        with gr.Row():
+                            # Left Column: Extractive TextRank
+                            with gr.Column(scale=1):
+                                gr.Markdown("#### 🔹 १. TextRank एक्स्ट्रॅक्टिव्ह सारांश (Extractive)")
+                                gr.Markdown("*लेखातील सर्वाधिक मध्यवर्ती/महत्त्वाच्या मूळ वाक्यांची निवड:*")
+                                summary_output = gr.Textbox(
+                                    label="TextRank Summary (Extractive)",
+                                    lines=8,
+                                )
+                                gr.Markdown(
+                                    """
+                                    **पद्धती तपशील:**
+                                    - मराठी वाक्य विभाजन (दंडा `।`, पूर्णविराम `.`, प्रश्न `?`)
+                                    - TF-IDF + Cosine Graph + PageRank Centrality
+                                    """
+                                )
+
+                            # Right Column: Abstractive mT5
+                            with gr.Column(scale=1):
+                                gr.Markdown("#### 🔸 २. mT5 ॲब्स्ट्रॅक्टिव्ह सारांश (Abstractive)")
+                                gr.Markdown("*`csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत सारांश:*")
+                                btn_generate_mt5 = gr.Button(
+                                    "✨ Generate mT5 Summary",
+                                    variant="primary",
+                                )
+                                mt5_summary_output = gr.Textbox(
+                                    label="mT5 Abstractive Summary (Machine-Generated, May Contain Errors)",
+                                    lines=8,
+                                    placeholder="mT5 सारांशासाठी वरील बटण दाबा...",
+                                )
+                                mt5_status_output = gr.Markdown("💡 *टीप: पहिल्या वेळी क्लिक केल्यावर मॉडेल कॅशमधून लोड होईल.*")
+
+                                with gr.Accordion("⚙️ mT5 जनरेशन पॅरामीटर्स (Generation Controls)", open=False):
+                                    with gr.Row():
+                                        mt5_max_len = gr.Slider(minimum=30, maximum=150, value=84, step=2, label="Max Length")
+                                        mt5_min_len = gr.Slider(minimum=10, maximum=80, value=30, step=2, label="Min Length")
+                                    with gr.Row():
+                                        mt5_beams = gr.Slider(minimum=1, maximum=8, value=4, step=1, label="Num Beams")
+                                        mt5_len_penalty = gr.Slider(minimum=0.5, maximum=2.0, value=1.0, step=0.1, label="Length Penalty")
+                                        mt5_ngram_size = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="No Repeat N-gram")
+
+                    # Tab 4: News Brief (Qwen3 Prompt-Engineered Brief)
+                    with gr.Tab("📰 बातम्या संक्षेप (News Brief - Qwen3)"):
+                        gr.Markdown("### ⚡ Qwen3-0.6B प्रॉम्प्ट-इंजिनिअर्ड बातम्या संक्षेप (News Brief)")
+                        gr.Markdown(
+                            "*लहान भाषा मॉडेल (`Qwen/Qwen3-0.6B`) वापरून बातमीचे शीर्षक आणि ३ महत्त्वाचे मुद्दे संक्षेप रूपात तयार करा:*"
                         )
+                        with gr.Row():
+                            with gr.Column(scale=3):
+                                brief_prompt_variant = gr.Radio(
+                                    choices=["zero_shot", "role_based", "role_constraints", "Compare all three"],
+                                    value="role_constraints",
+                                    label="प्रॉम्प्ट पर्याय (Prompt Variant)",
+                                    info="शून्य-शॉट (Zero-shot), भूमिका-आधारित (Role-based), भूमिका + अटी (Role + Constraints), किंवा तिन्हींची तुलना",
+                                )
+                            with gr.Column(scale=2):
+                                btn_generate_brief = gr.Button("✨ Generate News Brief", variant="primary", size="lg")
+
+                        with gr.Row():
+                            # Column 1: Zero-shot
+                            with gr.Column(scale=1):
+                                gr.Markdown("#### १. शून्य-शॉट (Zero-shot)")
+                                brief_out_zs = gr.Textbox(
+                                    label="Zero-shot Output",
+                                    lines=7,
+                                    placeholder="प्रॉम्प्ट जनरेशन निकाल येथे दिसेल...",
+                                )
+                                brief_badge_zs = gr.Markdown("")
+
+                            # Column 2: Role-based
+                            with gr.Column(scale=1):
+                                gr.Markdown("#### २. भूमिका-आधारित (Role-based)")
+                                brief_out_rb = gr.Textbox(
+                                    label="Role-based Output",
+                                    lines=7,
+                                    placeholder="प्रॉम्प्ट जनरेशन निकाल येथे दिसेल...",
+                                )
+                                brief_badge_rb = gr.Markdown("")
+
+                            # Column 3: Role + Constraints
+                            with gr.Column(scale=1):
+                                gr.Markdown("#### ३. भूमिका + अटी (Role + Constraints)")
+                                brief_out_rc = gr.Textbox(
+                                    label="Role + Constraints Output",
+                                    lines=7,
+                                    placeholder="प्रॉम्प्ट जनरेशन निकाल येथे दिसेल...",
+                                )
+                                brief_badge_rc = gr.Markdown("")
+
                         gr.HTML(
                             """
-                            <div class="alert-box">
-                                <b>📢 आगामी टप्पा (Stage 8 Note):</b><br>
-                                सध्या TextRank अल्गोरिदम वापरून महत्त्वाच्या वाक्यांचा सारांश काढला आहे.<br>
-                                <b>mT5 Multilingual XL-Sum</b> (<code>csebuetnlp/mT5_multilingual_XLSum</code>) हे डीप लर्निंग मॉडेल वापरून
-                                ॲब्स्ट्रॅक्टिव्ह (स्वतःच्या शब्दांत) सारांश आगामी टप्प्यात (Stage 8) येथे जोडला जाईल.
+                            <div class="warning-box">
+                                ⚠️ <b>महत्त्वाची नोंद (Caveat Note):</b><br>
+                                <i>Generated by a small 0.6B model. Marathi quality is limited and it may add information that is not in the article. Machine-generated, please verify.</i><br>
+                                (हे ०.६ अब्ज पॅरामीटर्सच्या लहान मॉडेलद्वारे (<code>Qwen/Qwen3-0.6B</code>) तयार केले आहे. मराठी भाषेची व्याकरण व वाक्यरचना गुणवत्ता मर्यादित असू शकते आणि मॉडेल लेखात नसलेली माहिती स्वतःहून जोडू शकते (hallucination). हे मशीन-निर्मित असून कृपया पडताळणी करावी.)
                             </div>
                             """
                         )
 
-                    # Tab 4: Sentiment
+                    # Tab 5: Sentiment
                     with gr.Tab("🎭 भावना विश्लेषण (Sentiment)"):
                         sentiment_label_out = gr.Markdown("भावना विश्लेषणासाठी लेख प्रविष्ट करा.")
                         gr.Markdown("#### सर्व भावनांचे मॉडेल भाकीत गुण (Model Prediction Scores by Class):")
@@ -569,7 +776,7 @@ def build_app():
                             ---
                             **मॉडेल तपशील:**
                             - **मॉडेल:** Gensim Latent Dirichlet Allocation (LDA)
-                            - **इष्टतम विषय संख्या (Optimal K):** १८ विषय ($C_v$ सुसंगतता: ०.३७६३)
+                            - **इष्टतम विषय संख्या (Optimal K):** १८ विषय ($C_v$ सुसंगतता: ०.४८५२)
                             - **प्रशिक्षण कॉर्पस:** L3Cube-MahaNews प्रशिक्षण डेटासेट (मराठी स्टॉपवर्ड्स फिल्टरिंगसह)
                             """
                         )
@@ -609,6 +816,37 @@ def build_app():
                 clean_text_out,
                 tokens_out,
                 tfidf_sample_out,
+            ],
+        )
+
+        # Wire Up mT5 Generate Button
+        btn_generate_mt5.click(
+            fn=handle_mt5_summary,
+            inputs=[
+                input_textbox,
+                mt5_max_len,
+                mt5_min_len,
+                mt5_beams,
+                mt5_len_penalty,
+                mt5_ngram_size,
+            ],
+            outputs=[
+                mt5_summary_output,
+                mt5_status_output,
+            ],
+        )
+
+        # Wire Up News Brief Generate Button
+        btn_generate_brief.click(
+            fn=handle_news_brief,
+            inputs=[input_textbox, brief_prompt_variant],
+            outputs=[
+                brief_out_zs,
+                brief_badge_zs,
+                brief_out_rb,
+                brief_badge_rb,
+                brief_out_rc,
+                brief_badge_rc,
             ],
         )
 

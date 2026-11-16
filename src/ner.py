@@ -57,12 +57,11 @@ def load_model():
     if _ner_pipeline is None:
         logger.info(f"Loading NER model: {MODEL_ID}...")
         try:
-            _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-            _model = AutoModelForTokenClassification.from_pretrained(MODEL_ID)
-        except Exception:
-            # Fallback to offline mode if network is unreachable
             _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, local_files_only=True)
             _model = AutoModelForTokenClassification.from_pretrained(MODEL_ID, local_files_only=True)
+        except Exception:
+            _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+            _model = AutoModelForTokenClassification.from_pretrained(MODEL_ID)
 
         _model.eval()
         _ner_pipeline = pipeline(

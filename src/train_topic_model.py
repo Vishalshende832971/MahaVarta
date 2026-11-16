@@ -14,8 +14,11 @@ Executes the full pipeline for Stage 7:
 import os
 import sys
 import json
+import tempfile
 import logging
 import pandas as pd
+
+os.environ["MPLCONFIGDIR"] = os.path.join(tempfile.gettempdir(), "matplotlib")
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -51,10 +54,10 @@ def main():
     stopwords = load_stopwords()
     logger.info(f"Loaded {len(stopwords)} Marathi stopwords.")
 
-    # Fixed random subsample of 3,000 articles for coherence scan
-    scan_sample_size = 3000
+    # Fixed random subsample of 8,000 articles for coherence scan
+    scan_sample_size = 8000
     scan_df_sample = df.sample(n=scan_sample_size, random_state=42)
-    logger.info(f"Using fixed subsample of {scan_sample_size} articles (seed=42) for coherence scan...")
+    logger.info(f"Using fixed subsample of {scan_sample_size} articles (seed=42) for coherence scan and final training...")
 
     tokenized_scan_docs = [
         preprocess_for_lda(str(text), stopwords=stopwords)
