@@ -1,0 +1,16 @@
+article,method,rouge1,rouge2,rougeL,seconds,reference
+01_short_sports.txt,TextRank,0.2368,0.1351,0.2105,0.0,human
+01_short_sports.txt,mT5,0.2623,0.1356,0.1639,14.4,human
+01_short_sports.txt,Qwen3 zero_shot,0.175,0.0513,0.15,1438.7,human
+01_short_sports.txt,Qwen3 role_based,0.16,0.0274,0.16,60.8,human
+01_short_sports.txt,Qwen3 role_constraints,0.2,0.0513,0.175,73.1,human
+02_medium_health.txt,TextRank,0.4688,0.1935,0.4062,0.3,human
+02_medium_health.txt,mT5,0.4103,0.2162,0.359,21.6,human
+02_medium_health.txt,Qwen3 zero_shot,0.375,0.0968,0.2812,67.9,human
+02_medium_health.txt,Qwen3 role_based,0.2353,0.0909,0.2059,71.5,human
+02_medium_health.txt,Qwen3 role_constraints,0.2353,0.0909,0.1765,78.0,human
+03_long_politics.txt,TextRank,0.3505,0.1895,0.3093,0.1,human
+03_long_politics.txt,mT5,0.24,0.1096,0.1867,25.3,human
+03_long_politics.txt,Qwen3 zero_shot,0.2222,0.0206,0.1616,103.1,human
+03_long_politics.txt,Qwen3 role_based,0.22,0.0408,0.18,95.7,human
+03_long_politics.txt,Qwen3 role_constraints,0.2796,0.0879,0.2151,87.2,human

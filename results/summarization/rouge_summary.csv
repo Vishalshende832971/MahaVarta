@@ -1,0 +1,6 @@
+method,rouge1,rouge2,rougeL,avg_seconds,n_articles
+TextRank,0.352,0.1727,0.3087,0.1333,3
+mT5,0.3042,0.1538,0.2365,20.4333,3
+Qwen3 zero_shot,0.2574,0.0562,0.1976,536.5667,3
+Qwen3 role_based,0.2051,0.053,0.182,76.0,3
+Qwen3 role_constraints,0.2383,0.0767,0.1889,79.4333,3
