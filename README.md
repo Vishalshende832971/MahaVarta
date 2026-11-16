@@ -2,7 +2,7 @@
 
 **NLP Mini Project — MIT Academy of Engineering, Alandi, Pune**
 
-**Team:** Vishal Gorakh Shende (PRN 202401110034), Gufran Shah (PRN [TODO])
+**Team:** Vishal Gorakh Shende (PRN 202401110034), Gufran Shah (PRN 202401110011)
 
 ---
 
