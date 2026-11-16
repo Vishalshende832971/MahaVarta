@@ -1,0 +1,13 @@
+              precision    recall  f1-score   support
+
+        Date     0.8626    0.8177    0.8396       192
+ Designation     0.6667    0.7027    0.6842        74
+    Location     0.7720    0.7322    0.7516       407
+     Measure     0.8364    0.8700    0.8529       523
+Organization     0.6783    0.6094    0.6420       256
+      Person     0.8729    0.8668    0.8699       428
+        Time     0.7500    0.4286    0.5455        63
+
+   micro avg     0.8060    0.7802    0.7929      1943
+   macro avg     0.7770    0.7182    0.7408      1943
+weighted avg     0.8035    0.7802    0.7899      1943

@@ -1,0 +1,37 @@
+# MahaVarta: Marathi News Classification & Summarization
+# Pinned versions from verified working environment (Windows, Python 3.12.8 - venv312)
+
+# Data handling & Scientific Computing
+pandas==3.1.1
+numpy==2.5.5
+scipy==1.18.1
+
+# Classical NLP, Machine Learning & Topic Modelling
+scikit-learn==1.9.1
+networkx==3.7
+gensim==4.4.0
+
+# Indic NLP Library for Marathi text processing
+indic-nlp-library==0.92
+
+# Deep Learning & Transformers
+torch==2.15.0
+transformers==5.23.0
+safetensors==0.8.0
+tokenizers==0.23.3
+huggingface-hub==2.4.0
+
+# User Interface
+gradio==6.32.0
+
+# Plotting & Visualization
+matplotlib==3.11.2
+seaborn==0.13.2
+
+# Evaluation & Metrics
+rouge-score==0.1.2
+seqeval==1.2.2
+
+# Serialization & Testing
+joblib==1.6.0
+pytest==9.2.0

@@ -1,0 +1,119 @@
+{
+  "accuracy": 0.8774,
+  "macro_precision": 0.8711,
+  "macro_recall": 0.8461,
+  "macro_f1": 0.857,
+  "test_samples": 5366,
+  "classes": [
+    "Auto",
+    "Bhakti",
+    "Crime",
+    "Education",
+    "Fashion",
+    "Health",
+    "International",
+    "Manoranjan",
+    "Politics",
+    "Sports",
+    "Tech",
+    "Travel"
+  ],
+  "per_class": [
+    {
+      "category": "Auto",
+      "marathi_name": "ऑटो",
+      "precision": 0.8981,
+      "recall": 0.8634,
+      "f1_score": 0.8804,
+      "support": 388
+    },
+    {
+      "category": "Bhakti",
+      "marathi_name": "भक्ती",
+      "precision": 0.9032,
+      "recall": 0.917,
+      "f1_score": 0.9101,
+      "support": 458
+    },
+    {
+      "category": "Crime",
+      "marathi_name": "गुन्हेगारी",
+      "precision": 0.878,
+      "recall": 0.8711,
+      "f1_score": 0.8745,
+      "support": 512
+    },
+    {
+      "category": "Education",
+      "marathi_name": "शिक्षण",
+      "precision": 0.9026,
+      "recall": 0.7722,
+      "f1_score": 0.8323,
+      "support": 180
+    },
+    {
+      "category": "Fashion",
+      "marathi_name": "फॅशन",
+      "precision": 0.8588,
+      "recall": 0.6636,
+      "f1_score": 0.7487,
+      "support": 110
+    },
+    {
+      "category": "Health",
+      "marathi_name": "आरोग्य",
+      "precision": 0.8624,
+      "recall": 0.9042,
+      "f1_score": 0.8828,
+      "support": 804
+    },
+    {
+      "category": "International",
+      "marathi_name": "आंतरराष्ट्रीय",
+      "precision": 0.7732,
+      "recall": 0.7915,
+      "f1_score": 0.7822,
+      "support": 590
+    },
+    {
+      "category": "Manoranjan",
+      "marathi_name": "मनोरंजन",
+      "precision": 0.9967,
+      "recall": 1.0,
+      "f1_score": 0.9983,
+      "support": 604
+    },
+    {
+      "category": "Politics",
+      "marathi_name": "राजकारण",
+      "precision": 0.8394,
+      "recall": 0.8777,
+      "f1_score": 0.8582,
+      "support": 548
+    },
+    {
+      "category": "Sports",
+      "marathi_name": "क्रीडा",
+      "precision": 0.9368,
+      "recall": 0.9326,
+      "f1_score": 0.9347,
+      "support": 668
+    },
+    {
+      "category": "Tech",
+      "marathi_name": "तंत्रज्ञान",
+      "precision": 0.804,
+      "recall": 0.7821,
+      "f1_score": 0.7929,
+      "support": 257
+    },
+    {
+      "category": "Travel",
+      "marathi_name": "पर्यटन",
+      "precision": 0.8,
+      "recall": 0.7773,
+      "f1_score": 0.7885,
+      "support": 247
+    }
+  ]
+}

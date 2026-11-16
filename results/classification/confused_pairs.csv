@@ -1,0 +1,6 @@
+﻿true_label,true_label_marathi,predicted_label,predicted_label_marathi,error_count
+Health,आरोग्य,International,आंतरराष्ट्रीय,36
+International,आंतरराष्ट्रीय,Health,आरोग्य,34
+Crime,गुन्हेगारी,Politics,राजकारण,25
+International,आंतरराष्ट्रीय,Crime,गुन्हेगारी,25
+International,आंतरराष्ट्रीय,Tech,तंत्रज्ञान,23

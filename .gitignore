@@ -1,0 +1,69 @@
+# Virtual environment
+venv/
+venv312/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.pytest_cache/
+
+# Byte-compiled files
+*.pyc
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables and secrets
+.env
+*.key
+*.pem
+
+# Model weights (downloaded at runtime)
+models/*.pt
+models/*.bin
+models/*.safetensors
+models/*.pkl
+models/*.joblib
+models/*.gensim*
+models/*.gensim_dict*
+
+# Trained classifier (can be retrained)
+models/classification_pipeline.joblib
+
+# Raw datasets (downloaded at runtime)
+data/*.csv
+data/*.tsv
+data/*.json
+data/*.zip
+data/mahanews/
+data/mahaner/
+
+# Keep annotation template and guide
+!data/annotations/*.csv
+!data/annotations/*.md
+!data/annotations/*.py
+
+# Large result files
+*.h5
+
+# Logs
+*.log
