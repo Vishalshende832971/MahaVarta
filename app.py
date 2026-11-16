@@ -24,6 +24,8 @@ import gradio as gr
 # Ensure src modules can be imported
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
+import pandas as pd
+from pathlib import Path
 from src.preprocessing import preprocess, read_uploaded_txt
 from src.classification import load as load_classifier, predict as predict_category, LABEL_TO_MARATHI
 from src.summarization import (
@@ -531,6 +533,22 @@ def handle_news_brief(text: str, prompt_variant: str):
 # ---------------------------------------------------------------------------
 # Gradio Blocks UI Construction
 # ---------------------------------------------------------------------------
+def load_rouge_tables():
+    """Load ROUGE results written by src/evaluation.py."""
+    base = Path(__file__).resolve().parent / "results" / "summarization"
+    summary_path = base / "rouge_summary.csv"
+    scores_path = base / "rouge_scores.csv"
+    if not summary_path.exists() or not scores_path.exists():
+        empty = pd.DataFrame({"message": ["Run `python -m src.evaluation` first."]})
+        return empty, empty
+    summary = pd.read_csv(summary_path).rename(columns={
+        "method": "Method", "rouge1": "ROUGE-1", "rouge2": "ROUGE-2",
+        "rougeL": "ROUGE-L", "avg_seconds": "Avg seconds", "n_articles": "Articles"})
+    per_article = pd.read_csv(scores_path).drop(columns=["reference"]).rename(columns={
+        "article": "Article", "method": "Method", "rouge1": "ROUGE-1",
+        "rouge2": "ROUGE-2", "rougeL": "ROUGE-L", "seconds": "Seconds"})
+    return summary, per_article
+
 def build_app():
     custom_css = """
     .main-header { text-align: center; margin-bottom: 20px; }
@@ -797,6 +815,31 @@ def build_app():
                                 label="Top Informative Terms by TF-IDF Weight (या लेखातील महत्त्वाचे शब्द)",
                                 headers=["शब्द (Word)", "TF-IDF Weight"],
                             )
+
+                     # Tab 8: Evaluation (ROUGE results)
+                    with gr.Tab("📊 मूल्यमापन (Evaluation)"):
+                        gr.Markdown(
+                        "### ROUGE evaluation of summarisation methods\n"
+                            "Scores are F-measures against human-written Marathi reference "
+                            "summaries for 3 sample articles. Results come from "
+                            "`python -m src.evaluation`."
+                )
+                _summary_df, _per_article_df = load_rouge_tables()
+                gr.Markdown("**Average across articles**")
+                gr.Dataframe(value=_summary_df, interactive=False)
+                gr.Markdown("**Per article**")
+                gr.Dataframe(value=_per_article_df, interactive=False)
+                gr.Markdown(
+                    "**How to read this**\n"
+                    "- Only 3 articles were evaluated, so differences are indicative, "
+                    "not statistically significant.\n"
+                    "- ROUGE rewards word overlap. TextRank copies article sentences, "
+                    "so it is favoured. mT5 paraphrases, which ROUGE under-rewards.\n"
+                    "- Qwen3 writes a headline plus three takeaways, not a short "
+                    "summary, so its comparison is not like for like.\n"
+                    "- The first Qwen3 zero_shot run includes the one-time model "
+                    "download, so its time is inflated."
+                )
 
         # Wire Up Analyze Button
         analyze_btn.click(
