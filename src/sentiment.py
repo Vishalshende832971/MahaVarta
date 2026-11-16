@@ -51,8 +51,12 @@ def load_model():
     global _tokenizer, _model
     if _tokenizer is None or _model is None:
         logger.info(f"Loading sentiment model and tokenizer: {MODEL_ID}...")
-        _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-        _model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID)
+        try:
+            _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, local_files_only=True)
+            _model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID, local_files_only=True)
+        except Exception:
+            _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+            _model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID)
         _model.eval()
         logger.info(f"Sentiment model loaded successfully. id2label: {_model.config.id2label}")
     return _tokenizer, _model

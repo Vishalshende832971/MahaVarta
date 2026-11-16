@@ -63,7 +63,7 @@ def load_stopwords(filepath: str = None) -> set[str]:
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 word = line.strip()
-                if word:
+                if word and not word.startswith("#"):
                     stopwords.add(word)
     else:
         logger.warning(f"Stopwords file not found at {path}. Using default fallback.")

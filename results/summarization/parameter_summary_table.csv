@@ -1,0 +1,17 @@
+﻿parameter,value,avg_summary_words,avg_seconds,avg_novel_word_ratio
+length_penalty,0.6,14.4,17.15,0.58
+length_penalty,1.0,15.4,18.11,0.58
+length_penalty,2.0,17.0,19.59,0.58
+max_length,60.0,15.4,17.77,0.58
+max_length,84.0,15.4,18.44,0.58
+max_length,128.0,15.4,17.86,0.58
+min_length,10.0,10.8,14.24,0.52
+min_length,30.0,15.4,18.44,0.58
+min_length,50.0,23.8,25.33,0.59
+no_repeat_ngram_size,0.0,21.2,27.18,0.27
+no_repeat_ngram_size,2.0,15.4,18.44,0.58
+no_repeat_ngram_size,3.0,11.4,17.0,0.45
+num_beams,1.0,12.6,7.53,0.62
+num_beams,2.0,13.2,13.21,0.59
+num_beams,4.0,15.4,18.44,0.58
+num_beams,6.0,15.6,24.96,0.62

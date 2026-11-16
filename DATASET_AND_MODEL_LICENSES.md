@@ -30,7 +30,7 @@ This file records the licences for all third-party datasets and pretrained model
 - **Model ID:** `csebuetnlp/mT5_multilingual_XLSum`
 - **Source:** https://huggingface.co/csebuetnlp/mT5_multilingual_XLSum
 - **Used for:** Abstractive Marathi summarisation
-- **Licence:** TODO: verify from the official model card
+- **Licence:** CC-BY-NC-SA-4.0 (Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International)
 
 ### Qwen3-0.6B
 - **Model ID:** `Qwen/Qwen3-0.6B`

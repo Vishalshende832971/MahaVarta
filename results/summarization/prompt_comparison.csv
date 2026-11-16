@@ -1,0 +1,148 @@
+﻿article_id,category,prompt_key,output,input_tokens,output_tokens,seconds,has_three_items,devanagari_ratio,novel_word_ratio,invented_name_candidates,words,marathi_quality_1to5,factual_accuracy_1to5,follows_constraints_yes_no,notes
+art_01_auto,Auto,zero_shot,"**""मारुतीने 'फाईव्ह स्टार' कार बनवून दाखवाव्यात टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज""**
+
+**1. टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज बनवाव्यात**  
+**2. फाईव्ह स्टार कार बनवाव्यात टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज**  
+**3.",117,220,90.89,False,1.0,0.1724,्ट्रॉझ,29,,,,
+art_01_auto,Auto,role_based,"**ताटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज बनविल फाईव्ह स्टार अल्ट्रॉझच्या लाँचिंग वर्षांच्या दाखवाव्यात मारुती अपलेबर असल्या विषय विश्लेषण असल्या विषय विश्लेषण असल्या विषय विश्लेषण**  
+
+**1. टाटा अल्ट्रॉझच्या लाँचिंग वर्षांच्य",128,220,74.34,False,1.0,0.5357,ताटा,28,,,,
+art_01_auto,Auto,role_constraints,"**फाईव्ह स्टार बनविल टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज**  
+
+1. मारुतीने टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज बनविल.  
+2. टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन चॅलेंज बनविल असता असता.  
+3. टाटा अल्ट्रॉझच्या लाँचिंगवेळी ओपन",183,220,69.36,True,1.0,0.2667,,30,,,,
+art_02_bhakti,Bhakti,zero_shot,"**अष्टसिद्धी देवळात लोकांची गर्दी दिवसेंदिवस वाढली.**  
+
+**1. अष्टसिद्धी देवळात लोकांची गर्दी दिवसेंदिवस वाढली.**  
+**2. त्यांच्या गणेशसेवेत खंड पडले आणि चिंचवड येथे राहिले.**  
+**3. तिथे�ही अष्टौप्रहर लोकांची वर्दळ सुरू झाली.**",417,215,81.33,False,1.0,0.2414,"द्धी, ष्टस",29,,,,
+art_02_bhakti,Bhakti,role_based,"**तिथेही अष्टसिद्धी प्राप्त झाली अमराया गोसावी यांना देवळात राहिले आणि त्यांच्या देवळात लोकांची गर्दी दिवसेंदिवस वाढली.**  
+
+**1. अष्टसिद्धी प्राप्त झाली अमराया गोसावी यांना देवळात राहिले.**  
+**2. त्यांच्या देवळात लोकांची गर्दी द",428,220,97.04,False,1.0,0.2258,अमराया,31,,,,
+art_02_bhakti,Bhakti,role_constraints,"**अष्टसिद्धी गोसावी यांना देवळात राहिले त्यांच्या गणेशसेवेत खंड बनले त्यांच्या देवळात राहिले.**  
+
+1. अष्टसिद्धी प्राप्त झाली त्यांच्या देवळात राहिले.  
+2. त्यांच्या देवळात राहिले त्यांच्या गणेशसेवेत खंड बनले.  
+3. त्यांच्या दे�",483,220,85.95,True,1.0,0.2,द्धी,30,,,,
+art_03_crime,Crime,zero_shot,"**लाेकमत न्यूज नेटवर्क**  
+
+**1. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास बारी बरावर बन रहा है.**  
+**2. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास बारी बरावर बन रहा है.**  
+**3. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास बारी बरावर बन र",53,220,120.07,False,1.0,0.6842,,38,,,,
+art_03_crime,Crime,role_based,"**लाेकमत न्यूज नेटवर्क**  
+
+**Key Takeaways:**  
+1. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास विकास के लिए एक नियम बनाना चाहता है।  
+2. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास विकास के लिए एक नियम बनाना चाहता है।  
+3. लाेकमत न्यूज नेटवर्क अपने �",64,220,110.92,True,0.9326,0.7143,"Key, Takeaways",42,,,,
+art_03_crime,Crime,role_constraints,"**लाेकमत न्यूज नेटवर्क**  
+
+1. लाेकमत न्यूज नेटवर्क अपने विश्वास विकास विकास के लिए एक नियम बनाता है।  
+2. लाेकमत न्यूज नेटवर्क एक विश्वास विकास के लिए एक नियम बनाता है।  
+3. लाेकमत न्यूज नेटवर्क एक विश्वास विकास के लिए एक नियम �",119,220,83.11,True,1.0,0.7209,,43,,,,
+art_04_education,Education,zero_shot,"**नवी दिल्ली – उमेदवारांना चांगला मुलाखतीत जावणासाठी यूपीएससी असो वा अन्य कुठलीही उत्तर देत जातात**  
+
+**1. उमेदवारांचं जनरल नॉलेज तपासण्यासाठी अनेक प्रश्न विचारले.**  
+**2. यूपीएससी असो वा अन्य कुठलीही मुलाखतीत उमेदवारांना असे फिरवू",419,220,97.78,False,1.0,0.0938,,32,,,,
+art_04_education,Education,role_based,"**नवी दिल्ली – उमेदवारांची जनरल नॉलेज तपासणी असलेल्या प्रश्नांची उत्तर देणारी असलेल्या यूपीएससी असो**  
+
+**1. उमेदवारांची जनरल नॉलेज तपासणी असलेल्या प्रश्नांची उत्तर देणारी असलेल्या यूपीएससी असो**  
+
+**2. उमेदवारांची जनरल नॉलेज तपा�",430,220,95.62,False,1.0,0.2667,,30,,,,
+art_04_education,Education,role_constraints,"**नवी दिल्ली – उमेदवारांना परीक्षेनंतर मुलाखतीत जावं लागतं**  
+
+1. यूपीएससी असो वा अन्य कुठलीही मुलाखत उमेदवारांना असे फिरवून प्रश्न विचारले.  
+2. उमेदवारांचं जनरल नॉलेज तपासण्यासाठी अनेक प्रश्न विचारले.  
+3. आम्ही तुम्हाला मुलाखतीत येण",485,220,95.16,True,1.0,0.0938,,32,,,,
+art_05_fashion,Fashion,zero_shot,"**""डायमंड चेहरा विज्ञान विश्वास विकास विकास विकास विकास""**  
+
+**1. डायमंड चेहरा विज्ञान विकास विकास विकास विकास विकास**  
+**2. डायमंड चेहरा विज्ञान विकास विकास विकास विकास विकास**  
+**3. डायमंड चेहरा विज्ञान विकास विकास विकास विकास वि�",48,220,84.0,False,1.0,0.7714,,35,,,,
+art_05_fashion,Fashion,role_based,"**Headline:**  
+""डायमंड चेहरा: विश्व विद्यालय विज्ञान विश्वविद्यालय बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार बाजार ब",59,220,77.59,False,0.9574,0.9429,"Headline, बाज, विज्ञान, विद्यालय, विश्व, विश्वविद्यालय",35,,,,
+art_05_fashion,Fashion,role_constraints,"**डायमंड चेहरा**  
+
+1. डायमंड चेहरा एक विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वासी विश्वा�",114,220,83.28,False,1.0,0.8519,,27,,,,
+art_06_health,Health,zero_shot,"**""ब्लूटूथ आजार आणि इअरफोन गाणी ऐकणे वातावर्तन वाढले आहेत""**
+
+**1. ब्लूटूथ आजार वाढले आहेत.**  
+**2. इअरफोन गाणी ऐकणे वातावर्तन वाढले.**  
+**3. या धोका अधिक वाढले आहेत.**",531,161,71.89,False,1.0,0.2308,,26,,,,
+art_06_health,Health,role_based,"**त्रास अनेक जण इअरफोन कानाला लावून गाणी ऐकत प्रवास करणे पसंत करतात.**  
+
+**1. युवकांमध्ये आजाराचे प्रमाण वाढत असल्याचे निरीक्षण तज्ज्ञांकडून नोंदविले जात आहे.**  
+**2. ब्लूटूथ ध्वनी अपने गॅझेटचा अतिवापर अंतर्गत आजाराचे प्रमाण वाढले.**  
+**",542,220,97.82,False,1.0,0.1212,,33,,,,
+art_06_health,Health,role_constraints,"**इअरफोन ब्लूटूथ अतिवापरामुळे युवकांच्या आजाराचे प्रमाण वाढले आहे.**  
+
+1. युवकांच्या आजाराचे प्रमाण वाढले.  
+2. बाइक, रेल्वे आणि बसांच्या आवाजाने गाणी ऐकणे अतिवापर असल्याचे निरीक्षण तज्ज्ञांकडून नोंदविले जात आहे.  
+3. या धोका अध",597,220,109.71,True,1.0,0.1875,,32,,,,
+art_07_international,International,zero_shot,"**#MarathiNewsHeadline:**  
+**#Covid19Waves: Data-Driven Plans Needed for Infection Surge**
+
+**Key Takeaways:**  
+1. **Transmissible Variants Rise:** New variants are more infectious and evade immunity.  
+2. **Hospitalizations & Infections Increase:** Higher infections will lead to more hospitalizations.  
+3. **Global Response Required:** Countries must adopt data-driven strategies to address the situation.",96,92,45.63,True,0.0,0.375,"Global, Increase, Key, MarathiNewsHeadline, Required, Rise, Surge, Takeaways",48,,,,
+art_07_international,International,role_based,"**Marathi Headline:**  
+""New #COVID19 Variants Erupt: Countries Must Strengthen Data-Driven Response""
+
+**Key Takeaways:**  
+1. #COVID19 variants are becoming more transmissible and immune-evasive.  
+2. Countries must implement data-driven strategies to handle rising infections.  
+3. #Hospitals and #Healthcare systems will face increased strain.",107,82,35.35,True,0.0,0.5,"Erupt, Headline, Healthcare, Key, Marathi, Strengthen, Takeaways",44,,,,
+art_07_international,International,role_constraints,"# Marathi News Editor's Analysis
+
+1. **#COVID19 Waves: New Variants are More Transmissible**  
+2. **Countries Must Implement Data-Driven Plans**  
+3. **Higher Infections Will Lead to More Hospitalizations**",162,52,23.89,True,0.0,0.3571,"Analysis, Editor, Implement, Lead, Marathi",28,,,,
+art_08_manoranjan,Manoranjan,zero_shot,"**उद्धव ठाकरेंनी लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला**  
+
+**1. उद्धव ठाकरेंनी ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला**  
+**2. ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला**  
+**3. ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ ल",60,220,110.73,False,1.0,0.0909,,44,,,,
+art_08_manoranjan,Manoranjan,role_based,"**लावला तो ऑडिओ** – उद्धव ठाकरेंनी लावला तो ऑडिओ विज्ञान विश्वास विकासाचा विश्वास देत आहे.  
+
+**Key Takeaways:**  
+1. उद्धव ठाकरेंनी लावला तो ऑडिओ विज्ञान विकासाचा विश्वास देत आहे.  
+2. लावला तो ऑडिओ विज्ञान विकासाचा विश्वास देत आहे.  
+3. उद्धव �",71,220,100.67,True,0.9326,0.5526,"Key, Takeaways",38,,,,
+art_08_manoranjan,Manoranjan,role_constraints,"**लावला तो ऑडिओ** 📱
+
+1. उद्धव ठाकरेंनी ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑडिओ लावला तो ऑ",126,220,102.97,False,1.0,0.0435,,46,,,,
+art_09_politics,Politics,zero_shot,"**भाजपने आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली**  
+
+**1. भाजपने आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली**  
+**2. भाजपने मते अत्यंत कमी मिळत होते**  
+**3. फार दिवस तुम्ही राष्ट्रवादी काँग्रेसमध्ये राहू नका**",451,210,111.76,False,1.0,0.0938,,32,,,,
+art_09_politics,Politics,role_based,"**भाजपने आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली**  
+
+**1. भाजपने आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली**  
+**2. भाजपने मते अत्यंत कमी मिळत होते**  
+**3. बावनकुळे म्हणाले काँग्रेस पक्षाला स्थान होते**",462,201,83.7,False,1.0,0.0968,None,31,,,,
+art_09_politics,Politics,role_constraints,"**भाजपने आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली**  
+
+1. भाजपने मला आमदार आता राज्याचे अध्यक्षपद भूषविण्याची संधी दिली.  
+2. तसेच १९९२ मध्ये शाखेचा अध्यक्ष झालो.  
+3. फार दिवस तुम्ही राष्ट्रवादी काँग्रेसमध्ये राहू नका.",517,220,125.38,True,1.0,0.0909,None,33,,,,
+art_10_sports,Sports,zero_shot,"**Shahin Shahifah vs Pakistan: How Did the India-Pakistan Clash Go?**  
+
+**Key Takeaways:**  
+1. **Shahin Shahifah's Performance:** Highlighted the key moments in the match.  
+2. **India's Strategy:** Emphasized the importance of teamwork and adaptability.  
+3. **Pakistan's Strength:** Emphasized the resilience and determination of the defending team.",105,88,39.83,True,0.0,0.9796,"Clash, Did, Emphasized, Go, Highlighted, How, India, Key, Pakistan, Performance, Shahifah, Shahin, Strategy, Strength, Takeaways",49,,,,
+art_10_sports,Sports,role_based,"**Shahin Shahifuddin vs Pakistan: How Did the India-Pakistan Clash Go?**  
+
+**Key Takeaways:**  
+1. The match highlighted the strategic importance of the Indian team.  
+2. The performance of Sachin Tendulkar showcased the strength of the Indian cricket team.  
+3. The clash between the two nations remains a significant moment in cricket history.",116,80,34.03,True,0.0,0.9808,"Clash, Did, Go, How, India, Indian, Key, Pakistan, Sachin, Shahifuddin, Shahin, Takeaways, Tendulkar, The",52,,,,
+art_10_sports,Sports,role_constraints,"**Shahin Shahifri vs. PAK: How Did the India Team Perform?**  
+
+1. **Shahin Shahifri's Performance:** The Indian team's performance in the match was notable.  
+2. **Tenduwal's Leadership:** The captain, Sachin Tendu, played a crucial role in the team's success.  
+3. **India's Strategy:** The team's approach to the game was effective, leading to a strong result.",171,99,44.56,True,0.0,0.9667,"Did, How, India, Indian, Leadership, Perform, Performance, Sachin, Shahifri, Shahin, Strategy, Team, Tendu, Tenduwal, The",60,,,,

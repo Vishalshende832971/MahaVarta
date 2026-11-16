@@ -17,6 +17,8 @@ indic-nlp-library==0.92
 # Deep Learning & Transformers
 torch==2.15.0
 transformers==5.23.0
+sentencepiece==0.2.3
+protobuf==7.36.2
 safetensors==0.8.0
 tokenizers==0.23.3
 huggingface-hub==2.4.0

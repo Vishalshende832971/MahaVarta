@@ -24,8 +24,8 @@ MahaVarta is an NLP application that analyses Marathi news articles. A user past
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/marathi-news-intelligence.git
-cd marathi-news-intelligence
+git clone https://github.com/Vishalshende832971/MahaVarta.git
+cd MahaVarta
 
 # Create virtual environment with Python 3.12
 py -3.12 -m venv venv312

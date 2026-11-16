@@ -37,7 +37,7 @@ Thumbs.db
 *.key
 *.pem
 
-# Model weights (downloaded at runtime)
+# Model weights (downloaded or trained at runtime)
 models/*.pt
 models/*.bin
 models/*.safetensors
@@ -45,6 +45,7 @@ models/*.pkl
 models/*.joblib
 models/*.gensim*
 models/*.gensim_dict*
+models/v1/
 
 # Trained classifier (can be retrained)
 models/classification_pipeline.joblib
@@ -64,6 +65,19 @@ data/mahaner/
 
 # Large result files
 *.h5
+
+# Gradio artifacts
+flagged/
+.gradio/
+
+# Coverage and testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary and swap files
+*.tmp
+*.bak
 
 # Logs
 *.log
