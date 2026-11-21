@@ -679,8 +679,8 @@ def build_app():
         --panel-background-fill: #ffffff !important;
     }
 
-    /* Clean Transparent Block Labels */
-    .block > label, .block > .label, label.block, [data-testid="block-label"], .label-wrap, .wrap label, span.block-title, label, .block-title {
+    /* Clean Transparent Block Titles/Labels (Exclude Radio and Checkbox Options) */
+    .block > label, .block > .label, label.block, [data-testid="block-label"], span.block-title, .block-title {
         background: transparent !important;
         background-color: transparent !important;
         border: none !important;
@@ -689,14 +689,108 @@ def build_app():
         color: #0f172a !important;
         font-weight: 800 !important;
     }
-    .block > label *, .block > .label *, label.block *, [data-testid="block-label"] *, .label-wrap *, label * {
+    .block > label:not(:has(input)), .block > .label:not(:has(input)), [data-testid="block-label"] span {
         background: transparent !important;
-        background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
         color: #0f172a !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
+        padding: 0 !important;
+    }
+
+    /* Radio Groups & Options (Ensures Highly Visible Selection) */
+    .gradio-container div[role="radiogroup"],
+    .gradio-container [data-testid="radio-group"],
+    .gradio-container .gr-radio,
+    .gradio-container .wrap:has(input[type="radio"]) {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        padding: 4px 0 !important;
+    }
+
+    /* Base Radio Option Chip */
+    .gradio-container div[role="radiogroup"] label,
+    .gradio-container [data-testid="radio-group"] label,
+    .gradio-container .gr-radio label,
+    .gradio-container label:has(input[type="radio"]) {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 16px !important;
+        border-radius: 10px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* Hover state */
+    .gradio-container label:has(input[type="radio"]):hover,
+    .gradio-container div[role="radiogroup"] label:hover {
+        background: #f8fafc !important;
+        border-color: #818cf8 !important;
+        color: #0f172a !important;
+    }
+
+    /* SELECTED Radio Option (Clear Visible Indigo Card) */
+    .gradio-container label:has(input[type="radio"]:checked),
+    .gradio-container label.selected:has(input[type="radio"]),
+    .gradio-container div[role="radiogroup"] label.selected,
+    .gradio-container div[role="radiogroup"] label[aria-checked="true"],
+    .gradio-container [data-testid="radio-group"] label.selected {
+        background: #eef2ff !important;
+        background-color: #eef2ff !important;
+        border: 2px solid #4f46e5 !important;
+        color: #312e81 !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2) !important;
+    }
+
+    /* Visible Radio Circle */
+    .gradio-container input[type="radio"] {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        min-height: 18px !important;
+        border: 2px solid #94a3b8 !important;
+        border-radius: 50% !important;
+        background-color: #ffffff !important;
+        outline: none !important;
+        display: inline-grid !important;
+        place-content: center !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .gradio-container input[type="radio"]:checked {
+        border-color: #4f46e5 !important;
+        background-color: #ffffff !important;
+    }
+
+    .gradio-container input[type="radio"]:checked::before {
+        content: "" !important;
+        width: 9px !important;
+        height: 9px !important;
+        border-radius: 50% !important;
+        background-color: #4f46e5 !important;
+        box-shadow: 0 0 4px rgba(79, 70, 229, 0.6) !important;
+    }
+
+    .gradio-container input[type="radio"] + span,
+    .gradio-container label:has(input[type="radio"]) span {
+        color: inherit !important;
+        font-weight: inherit !important;
+        background: transparent !important;
         padding: 0 !important;
     }
 
