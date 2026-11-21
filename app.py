@@ -386,14 +386,33 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
         sent_brief = sentiment_result.get("label", "N/A") if sentiment_result else "N/A"
         sent_brief_score = f"{sentiment_result.get('score', 0.0):.4f}" if sentiment_result else "0.0000"
 
-        overview_md = f"""
-### 📊 बातमीचे विश्लेषण (Executive Summary)
+        sent_color_cls = "sentiment-neu"
+        if "positive" in sent_brief.lower():
+            sent_color_cls = "sentiment-pos"
+        elif "negative" in sent_brief.lower():
+            sent_color_cls = "sentiment-neg"
 
-- **अनुमानित मुख्य वर्ग (Predicted Category):** **`{top_category_name}`**
-- **अनुमानित भावना (Predicted Sentiment):** **`{sent_brief}`** *(भाकीत गुण: `{sent_brief_score}`)*
-- **प्रमुख शोधलेला विषय (Dominant LDA Topic):** **`{top_topic_str}`**
-- **एकूण शब्द (Word Count):** `{len(words)}` | **वाक्ये (Sentences):** `{len(sents)}` | **अक्षरे (Characters):** `{len(article_text)}`
-- **प्रमुख घटक (Key Entities):** {key_ents_str}
+        overview_md = f"""
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-title">🏷️ अनुमानित मुख्य वर्ग (Predicted Category)</div>
+        <div class="kpi-value"><span class="category-badge">{top_category_name}</span></div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">🎭 अनुमानित भावना (Predicted Sentiment)</div>
+        <div class="kpi-value"><span class="{sent_color_cls}">● {sent_brief}</span> <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">({sent_brief_score})</span></div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">🎯 प्रमुख शोधलेला विषय (Dominant Topic)</div>
+        <div class="kpi-value" style="font-size:1.05rem;">{top_topic_str}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">📊 लेख सांख्यिकी (Article Stats)</div>
+        <div class="kpi-value" style="font-size:0.95rem;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये | <b>{len(article_text)}</b> अक्षरे</div>
+    </div>
+</div>
+
+**👥 प्रमुख घटक (Key Entities):** {key_ents_str}
 
 ---
 
@@ -551,34 +570,198 @@ def load_rouge_tables():
 
 def build_app():
     custom_css = """
-    .main-header { text-align: center; margin-bottom: 20px; }
+    /* Modern Glassmorphic Hero Banner */
+    .hero-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+        padding: 30px 24px;
+        border-radius: 18px;
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.3), 0 4px 10px -2px rgba(15, 23, 42, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        padding: 6px 18px;
+        border-radius: 9999px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0;
+    }
+    .hero-title {
+        font-size: 2.4rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px 0 !important;
+        background: linear-gradient(120deg, #ffffff 0%, #cbd5e1 40%, #93c5fd 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: #94a3b8;
+        margin: 0 0 18px 0;
+        font-weight: 400;
+    }
+    .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        font-size: 0.88rem;
+    }
+    .meta-item {
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(4px);
+        padding: 6px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+    }
+    .meta-item b {
+        color: #38bdf8;
+    }
+
+    /* Primary Action Button */
+    .primary-btn {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px 0 rgba(79, 70, 229, 0.4) !important;
+        transition: all 0.25s ease-in-out !important;
+        padding: 12px 24px !important;
+    }
+    .primary-btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.55) !important;
+    }
+
+    /* Executive Summary KPI Dashboard Cards */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+        margin-top: 10px;
+    }
+    .kpi-card {
+        background: rgba(248, 250, 252, 0.9);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 14px 18px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    }
+    .dark .kpi-card {
+        background: rgba(30, 41, 59, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .kpi-title {
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .dark .kpi-title {
+        color: #94a3b8;
+    }
+    .kpi-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .dark .kpi-value {
+        color: #f8fafc;
+    }
+    .category-badge {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-weight: 800;
+        border: 1px solid rgba(67, 56, 202, 0.2);
+    }
+    .dark .category-badge {
+        background: #312e81;
+        color: #c7d2fe;
+        border: 1px solid rgba(199, 210, 254, 0.2);
+    }
+    .sentiment-pos {
+        color: #16a34a !important;
+        font-weight: 800;
+    }
+    .sentiment-neu {
+        color: #d97706 !important;
+        font-weight: 800;
+    }
+    .sentiment-neg {
+        color: #dc2626 !important;
+        font-weight: 800;
+    }
+
+    /* Alert and Note Callout Boxes */
     .alert-box {
-        background-color: #f0f7ff;
-        border-left: 5px solid #0066cc;
-        padding: 12px 16px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border-left: 5px solid #10b981;
+        padding: 14px 18px;
         margin-top: 15px;
-        border-radius: 4px;
+        border-radius: 10px;
         font-size: 0.95em;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.08);
     }
     .warning-box {
-        background-color: #fff9e6;
-        border-left: 5px solid #ff9900;
-        padding: 12px 16px;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-left: 5px solid #f59e0b;
+        padding: 14px 18px;
         margin-top: 15px;
-        border-radius: 4px;
+        border-radius: 10px;
         font-size: 0.92em;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.08);
+        color: #92400e;
     }
     """
 
-    with gr.Blocks(title="MahaVarta - Marathi News Intelligence", css=custom_css) as demo:
-        gr.Markdown(
+    soft_theme = gr.themes.Soft(
+        primary_hue="indigo",
+        secondary_hue="amber",
+        neutral_hue="slate",
+    )
+
+    with gr.Blocks(title="MahaVarta - Marathi News Intelligence", theme=soft_theme, css=custom_css) as demo:
+        gr.HTML(
             """
-            # 📰 MahaVarta (महावार्ता): Marathi News Intelligence
-            ### मराठी बातमी विश्लेषण, वर्गीकरण आणि सारांशीकरण प्रणाली
-            **NLP Mini Project — MIT Academy of Engineering, Alandi, Pune**
-            **Team:** Vishal Gorakh Shende (PRN 202401110034) & Gufran Shah | **Course:** Natural Language Processing
-            """,
-            elem_classes=["main-header"],
+            <div class="hero-banner">
+                <div class="hero-badge">
+                    🎓 NLP Mini Project — MIT Academy of Engineering (MITAOE), Alandi, Pune
+                </div>
+                <h1 class="hero-title">📰 MahaVarta (महावार्ता)</h1>
+                <p class="hero-subtitle">मराठी बातमी विश्लेषण, वर्गीकरण आणि बहु-मॉडेल सारांशीकरण प्रणाली</p>
+                <div class="hero-meta">
+                    <span class="meta-item">👨‍💻 <b>Vishal Shende</b> (202401110034) &amp; <b>Gufran Shah</b> (202401110011)</span>
+                    <span class="meta-item">⚡ <b>Linear SVM (87.74% Accuracy)</b></span>
+                    <span class="meta-item">🤖 <b>mT5 XL-Sum Abstractive</b></span>
+                    <span class="meta-item">🧠 <b>Qwen3-0.6B LLM</b></span>
+                    <span class="meta-item">🏷️ <b>MahaNER (96.51% Token Acc)</b></span>
+                    <span class="meta-item">🎯 <b>18-Topic LDA</b></span>
+                </div>
+            </div>
+            """
         )
 
         with gr.Row():
@@ -603,14 +786,14 @@ def build_app():
                     label="सारांश वाक्यांची संख्या (TextRank Summary Sentence Count)",
                 )
 
-                analyze_btn = gr.Button("🔍 बातमीचे विश्लेषण करा (Analyse Article)", variant="primary", size="lg")
+                analyze_btn = gr.Button("🔍 बातमीचे विश्लेषण करा (Analyse Article)", variant="primary", size="lg", elem_classes=["primary-btn"])
 
                 # Sample Article Quick Load Buttons
-                gr.Markdown("#### 📂 नमुना बातम्या (Sample Articles)")
+                gr.Markdown("#### 📂 नमुना बातम्या (Click to Quick-Load Sample)")
                 with gr.Row():
-                    btn_sample_short = gr.Button("१. क्रीडा (Short - Sports)", size="sm")
-                    btn_sample_med = gr.Button("२. आरोग्य (Medium - Health)", size="sm")
-                    btn_sample_long = gr.Button("३. राजकारण (Long - Politics)", size="sm")
+                    btn_sample_short = gr.Button("🏏 १. क्रीडा (Sports)", size="sm")
+                    btn_sample_med = gr.Button("🩺 २. आरोग्य (Health)", size="sm")
+                    btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm")
 
             # Right Output Tabs Column
             with gr.Column(scale=6):
