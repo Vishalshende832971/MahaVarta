@@ -785,6 +785,77 @@ def build_app():
         border-radius: 6px;
     }
 
+    /* Clean, Visible Tab Navigation Buttons */
+    .tabs > .tab-nav, div[role="tablist"] {
+        border-bottom: 2px solid #e2e8f0 !important;
+        gap: 6px !important;
+        background: #ffffff !important;
+        padding: 6px 8px !important;
+        border-radius: 12px 12px 0 0 !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+    .tabs > .tab-nav button, div[role="tablist"] button {
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 0.88rem !important;
+        padding: 8px 14px !important;
+        border-radius: 8px !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #f1f5f9 !important;
+        transition: all 0.15s ease !important;
+        white-space: nowrap !important;
+    }
+    .tabs > .tab-nav button:hover, div[role="tablist"] button:hover {
+        color: #0f172a !important;
+        background: #e2e8f0 !important;
+    }
+    .tabs > .tab-nav button.selected, div[role="tablist"] button[aria-selected="true"], div[role="tablist"] button.selected {
+        color: #ffffff !important;
+        background: #4f46e5 !important;
+        border-color: #4338ca !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35) !important;
+    }
+
+    /* Crisp White Dataframes & Tables (Overrides Dark Mode) */
+    .dataframe, table, .table-wrap, .table-wrap * {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+    table th, .table-wrap th {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+        font-size: 0.85rem !important;
+    }
+    table td, .table-wrap td {
+        background-color: #ffffff !important;
+        color: #334155 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        font-size: 0.85rem !important;
+    }
+    table tr:hover td {
+        background-color: #f8fafc !important;
+    }
+
+    /* Clean Sample Buttons */
+    .sample-btn {
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 6px 12px !important;
+    }
+    .sample-btn:hover {
+        background: #eef2ff !important;
+        color: #4338ca !important;
+        border-color: #818cf8 !important;
+    }
+
     /* Pipeline Guide Under Analyze Button */
     .pipeline-guide {
         display: flex;
@@ -874,9 +945,9 @@ def build_app():
             with gr.Column(scale=4):
                 gr.Markdown("### ✍️ नमुना बातमी निवडा (Quick Samples)")
                 with gr.Row():
-                    btn_sample_short = gr.Button("🏏 १. क्रीडा (Sports)", size="sm", variant="secondary")
-                    btn_sample_med = gr.Button("🩺 २. आरोग्य (Health)", size="sm", variant="secondary")
-                    btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm", variant="secondary")
+                    btn_sample_short = gr.Button("🏏 १. क्रीडा (Sports)", size="sm", elem_classes=["sample-btn"])
+                    btn_sample_med = gr.Button("🩺 २. आरोग्य (Health)", size="sm", elem_classes=["sample-btn"])
+                    btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm", elem_classes=["sample-btn"])
 
                 input_textbox = gr.Textbox(
                     label="मराठी बातमीचा मजकूर पेस्ट करा (Paste Marathi News Article)",
@@ -1112,30 +1183,30 @@ def build_app():
                                 headers=["शब्द (Word)", "TF-IDF Weight"],
                             )
 
-                     # Tab 8: Evaluation (ROUGE results)
+                    # Tab 8: Evaluation (ROUGE results)
                     with gr.Tab("📊 मूल्यमापन (Evaluation)"):
                         gr.Markdown(
-                        "### ROUGE evaluation of summarisation methods\n"
+                            "### ROUGE evaluation of summarisation methods\n"
                             "Scores are F-measures against human-written Marathi reference "
                             "summaries for 3 sample articles. Results come from "
                             "`python -m src.evaluation`."
-                )
-                _summary_df, _per_article_df = load_rouge_tables()
-                gr.Markdown("**Average across articles**")
-                gr.Dataframe(value=_summary_df, interactive=False)
-                gr.Markdown("**Per article**")
-                gr.Dataframe(value=_per_article_df, interactive=False)
-                gr.Markdown(
-                    "**How to read this**\n"
-                    "- Only 3 articles were evaluated, so differences are indicative, "
-                    "not statistically significant.\n"
-                    "- ROUGE rewards word overlap. TextRank copies article sentences, "
-                    "so it is favoured. mT5 paraphrases, which ROUGE under-rewards.\n"
-                    "- Qwen3 writes a headline plus three takeaways, not a short "
-                    "summary, so its comparison is not like for like.\n"
-                    "- The first Qwen3 zero_shot run includes the one-time model "
-                    "download, so its time is inflated."
-                )
+                        )
+                        _summary_df, _per_article_df = load_rouge_tables()
+                        gr.Markdown("**Average across articles**")
+                        gr.Dataframe(value=_summary_df, interactive=False)
+                        gr.Markdown("**Per article**")
+                        gr.Dataframe(value=_per_article_df, interactive=False)
+                        gr.Markdown(
+                            "**How to read this**\n"
+                            "- Only 3 articles were evaluated, so differences are indicative, "
+                            "not statistically significant.\n"
+                            "- ROUGE rewards word overlap. TextRank copies article sentences, "
+                            "so it is favoured. mT5 paraphrases, which ROUGE under-rewards.\n"
+                            "- Qwen3 writes a headline plus three takeaways, not a short "
+                            "summary, so its comparison is not like for like.\n"
+                            "- The first Qwen3 zero_shot run includes the one-time model "
+                            "download, so its time is inflated."
+                        )
 
         # Wire Up Analyze Button
         analyze_btn.click(
