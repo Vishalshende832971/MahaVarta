@@ -395,40 +395,40 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
                 for org in grouped_quick["Organization"][:4]:
                     entity_badges_html.append(f'<span class="entity-pill pill-org">🏢 {org}</span>')
 
-        entity_pills_disp = " ".join(entity_badges_html) if entity_badges_html else '<span style="color:#94a3b8; font-size:0.9rem;">या बातमीत ठळक घटक आढळले नाहीत.</span>'
+        entity_pills_disp = " ".join(entity_badges_html) if entity_badges_html else '<span style="color:#1e293b; font-weight:700; font-size:0.92rem;">या बातमीत ठळक घटक आढळले नाहीत.</span>'
 
         overview_md = f"""
 <div class="kpi-grid">
     <div class="kpi-card card-cat">
         <div class="kpi-title">🏷️ अनुमानित मुख्य वर्ग (Predicted Category)</div>
         <div class="kpi-value"><span class="category-badge">{top_category_name}</span></div>
-        <div class="kpi-sub">Linear SVM (C=0.5, 87.74% Acc)</div>
+        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">Linear SVM (C=0.5, 87.74% Acc)</div>
     </div>
     <div class="kpi-card card-sent">
         <div class="kpi-title">🎭 अनुमानित भावना (Predicted Sentiment)</div>
         <div class="kpi-value"><span class="{sent_color_cls}">● {sent_brief}</span></div>
-        <div class="kpi-sub">मॉडेल भाकीत गुण: <b>{sent_brief_score}</b></div>
+        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">मॉडेल भाकीत गुण: <b>{sent_brief_score}</b></div>
     </div>
     <div class="kpi-card card-topic">
         <div class="kpi-title">🎯 प्रमुख शोधलेला विषय (Dominant Topic)</div>
-        <div class="kpi-value" style="font-size:1.05rem; color:#0f766e;">{top_topic_str}</div>
-        <div class="kpi-sub">18-Topic Unsupervised LDA Model</div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#047857; font-weight:800;">{top_topic_str}</div>
+        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">18-Topic Unsupervised LDA Model</div>
     </div>
     <div class="kpi-card card-stats">
         <div class="kpi-title">📊 बातमी सांख्यिकी (Article Stats)</div>
-        <div class="kpi-value" style="font-size:1.05rem; color:#1e293b;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये</div>
-        <div class="kpi-sub">एकूण अक्षरे: {len(article_text)} | UTF-8 Devanagari</div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#0f172a; font-weight:800;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये</div>
+        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">एकूण अक्षरे: {len(article_text)} | UTF-8 Devanagari</div>
     </div>
 </div>
 
 <div class="executive-box">
-    <div class="box-title">👥 शोधलेले प्रमुख घटक (Key Extracted Entities)</div>
+    <div class="box-title" style="color:#0f172a; font-weight:800;">👥 शोधलेले प्रमुख घटक (Key Extracted Entities)</div>
     <div class="entity-container">{entity_pills_disp}</div>
 </div>
 
 <div class="executive-box" style="margin-top: 14px;">
-    <div class="box-title">📝 संक्षिप्त मजकूर सारांश (TextRank Extractive Summary)</div>
-    <div class="summary-body">{summary_text}</div>
+    <div class="box-title" style="color:#0f172a; font-weight:800;">📝 संक्षिप्त मजकूर सारांश (TextRank Extractive Summary)</div>
+    <div class="summary-body" style="color:#0f172a; font-weight:600;">{summary_text}</div>
 </div>
 """
     except Exception as e:
@@ -634,8 +634,8 @@ def build_app():
     }
     .brand-tagline {
         font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 500;
+        color: #1e293b;
+        font-weight: 600;
         margin-top: 2px;
     }
     .nav-badges {
@@ -648,31 +648,31 @@ def build_app():
         padding: 5px 12px;
         border-radius: 8px;
         font-size: 0.82rem;
-        font-weight: 600;
+        font-weight: 700;
         border: 1px solid transparent;
         white-space: nowrap;
     }
-    .badge-primary { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
-    .badge-info { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
-    .badge-accent { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-    .badge-purple { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
-    .badge-author { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+    .badge-primary { background: #e0e7ff; color: #312e81 !important; border-color: #a5b4fc; }
+    .badge-info { background: #e0f2fe; color: #075985 !important; border-color: #7dd3fc; }
+    .badge-accent { background: #fef3c7; color: #78350f !important; border-color: #fcd34d; }
+    .badge-purple { background: #f3e8ff; color: #581c87 !important; border-color: #d8b4fe; }
+    .badge-author { background: #e2e8f0; color: #0f172a !important; border-color: #94a3b8; font-weight: 800; }
 
     /* High-Impact Primary Action Button */
     .primary-btn {
         background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
         color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 1.02rem !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
         border: none !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35) !important;
+        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4) !important;
         transition: all 0.2s ease-in-out !important;
         padding: 12px 24px !important;
     }
     .primary-btn:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.5) !important;
+        box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.55) !important;
     }
 
     /* Executive KPI Dashboard Cards (2x2 Fixed Grid) */
@@ -689,27 +689,27 @@ def build_app():
     }
     .kpi-card, .dark .kpi-card {
         background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1.5px solid #cbd5e1 !important;
         border-radius: 12px !important;
         padding: 14px 16px !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
     }
-    .card-cat { border-left: 4px solid #4f46e5 !important; }
-    .card-sent { border-left: 4px solid #0284c7 !important; }
-    .card-topic { border-left: 4px solid #0d9488 !important; }
-    .card-stats { border-left: 4px solid #64748b !important; }
+    .card-cat { border-left: 5px solid #4f46e5 !important; }
+    .card-sent { border-left: 5px solid #0284c7 !important; }
+    .card-topic { border-left: 5px solid #0d9488 !important; }
+    .card-stats { border-left: 5px solid #475569 !important; }
 
     .kpi-title, .dark .kpi-title {
-        font-size: 0.74rem !important;
+        font-size: 0.78rem !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
-        color: #64748b !important;
-        font-weight: 700 !important;
+        color: #0f172a !important;
+        font-weight: 800 !important;
         margin-bottom: 4px !important;
     }
     .kpi-value, .dark .kpi-value {
@@ -719,45 +719,45 @@ def build_app():
         line-height: 1.3;
     }
     .kpi-sub {
-        font-size: 0.78rem;
-        color: #94a3b8;
+        font-size: 0.82rem;
+        color: #1e293b !important;
         margin-top: 4px;
-        font-weight: 500;
+        font-weight: 700;
     }
     .category-badge, .dark .category-badge {
         display: inline-block;
         background: #eef2ff !important;
-        color: #4338ca !important;
-        padding: 4px 12px;
+        color: #312e81 !important;
+        padding: 4px 14px;
         border-radius: 8px;
         font-weight: 800;
-        border: 1px solid rgba(67, 56, 202, 0.25) !important;
+        border: 1.5px solid #818cf8 !important;
     }
     .sentiment-pos {
-        color: #16a34a !important;
+        color: #15803d !important;
         font-weight: 800;
     }
     .sentiment-neu {
-        color: #d97706 !important;
+        color: #b45309 !important;
         font-weight: 800;
     }
     .sentiment-neg {
-        color: #dc2626 !important;
+        color: #b91c1c !important;
         font-weight: 800;
     }
 
     /* Executive Box & Entity Pills */
     .executive-box {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1.5px solid #cbd5e1;
         border-radius: 12px;
         padding: 14px 18px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
     }
     .box-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #0f172a;
         margin-bottom: 8px;
     }
     .entity-container {
@@ -767,27 +767,28 @@ def build_app():
     }
     .entity-pill {
         display: inline-block;
-        padding: 3px 10px;
+        padding: 4px 12px;
         border-radius: 6px;
-        font-size: 0.84rem;
-        font-weight: 600;
+        font-size: 0.86rem;
+        font-weight: 700;
     }
-    .pill-person { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-    .pill-location { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-    .pill-org { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .pill-person { background: #dbeafe !important; color: #1e3a8a !important; border: 1px solid #93c5fd !important; }
+    .pill-location { background: #d1fae5 !important; color: #064e3b !important; border: 1px solid #6ee7b7 !important; }
+    .pill-org { background: #ede9fe !important; color: #581c87 !important; border: 1px solid #c4b5fd !important; }
     .summary-body {
-        font-size: 0.96rem;
-        line-height: 1.6;
-        color: #334155;
+        font-size: 1.02rem;
+        line-height: 1.65;
+        color: #0f172a !important;
+        font-weight: 500;
         background: #f8fafc;
-        border-left: 3px solid #3b82f6;
-        padding: 12px 16px;
+        border-left: 4px solid #3b82f6;
+        padding: 14px 18px;
         border-radius: 6px;
     }
 
     /* Clean, Visible Tab Navigation Buttons */
     .tabs > .tab-nav, div[role="tablist"] {
-        border-bottom: 2px solid #e2e8f0 !important;
+        border-bottom: 2px solid #cbd5e1 !important;
         gap: 6px !important;
         background: #ffffff !important;
         padding: 6px 8px !important;
@@ -796,26 +797,26 @@ def build_app():
         flex-wrap: wrap !important;
     }
     .tabs > .tab-nav button, div[role="tablist"] button {
-        color: #334155 !important;
-        font-weight: 700 !important;
-        font-size: 0.88rem !important;
-        padding: 8px 14px !important;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 0.9rem !important;
+        padding: 8px 16px !important;
         border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
-        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #e2e8f0 !important;
         transition: all 0.15s ease !important;
         white-space: nowrap !important;
     }
     .tabs > .tab-nav button:hover, div[role="tablist"] button:hover {
         color: #0f172a !important;
-        background: #e2e8f0 !important;
+        background: #cbd5e1 !important;
     }
     .tabs > .tab-nav button.selected, div[role="tablist"] button[aria-selected="true"], div[role="tablist"] button.selected {
         color: #ffffff !important;
         background: #4f46e5 !important;
-        border-color: #4338ca !important;
-        font-weight: 800 !important;
-        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35) !important;
+        border-color: #3730a3 !important;
+        font-weight: 900 !important;
+        box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4) !important;
     }
 
     /* Crisp White Dataframes & Tables (Overrides Dark Mode) */
@@ -826,15 +827,16 @@ def build_app():
     table th, .table-wrap th {
         background-color: #f1f5f9 !important;
         color: #0f172a !important;
-        font-weight: 700 !important;
-        border-bottom: 2px solid #cbd5e1 !important;
-        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+        border-bottom: 2px solid #94a3b8 !important;
+        font-size: 0.88rem !important;
     }
     table td, .table-wrap td {
         background-color: #ffffff !important;
-        color: #334155 !important;
+        color: #0f172a !important;
+        font-weight: 600 !important;
         border-bottom: 1px solid #e2e8f0 !important;
-        font-size: 0.85rem !important;
+        font-size: 0.88rem !important;
     }
     table tr:hover td {
         background-color: #f8fafc !important;
@@ -843,17 +845,17 @@ def build_app():
     /* Clean Sample Buttons */
     .sample-btn {
         background: #ffffff !important;
-        color: #1e293b !important;
-        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border: 1.5px solid #94a3b8 !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        padding: 6px 12px !important;
+        font-weight: 700 !important;
+        font-size: 0.88rem !important;
+        padding: 7px 14px !important;
     }
     .sample-btn:hover {
         background: #eef2ff !important;
         color: #4338ca !important;
-        border-color: #818cf8 !important;
+        border-color: #6366f1 !important;
     }
 
     /* Pipeline Guide Under Analyze Button */
@@ -862,21 +864,49 @@ def build_app():
         flex-wrap: wrap;
         justify-content: center;
         gap: 8px;
-        font-size: 0.78rem;
-        color: #64748b;
+        font-size: 0.82rem;
+        color: #0f172a !important;
         margin-top: 10px;
         padding: 8px 12px;
-        background: #f1f5f9;
+        background: #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 700;
+    }
+    .pipeline-guide span {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    /* High-Contrast Readability for All Markdown, Labels & Disclaimers */
+    p, span, div, li, strong, b, h1, h2, h3, h4, h5, h6 {
+        color: #0f172a !important;
+    }
+    em, i {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+    blockquote {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        background: #f1f5f9 !important;
+        border-left: 4px solid #4f46e5 !important;
+        padding: 12px 16px !important;
+        border-radius: 6px !important;
+    }
+    label span, .block label, .form label, .wrap label {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
     }
 
     /* Inputs, Textareas and Tables */
     .dark input, .dark textarea, .dark select, input, textarea {
         background-color: #ffffff !important;
         color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1.5px solid #94a3b8 !important;
         border-radius: 10px !important;
+        font-weight: 500 !important;
     }
     .dark table, table {
         background-color: #ffffff !important;
@@ -888,26 +918,28 @@ def build_app():
 
     /* Alert and Note Callout Boxes */
     .alert-box {
-        background: #f0fdf4 !important;
-        border-left: 5px solid #10b981 !important;
+        background: #dcfce7 !important;
+        border-left: 5px solid #16a34a !important;
         padding: 14px 18px;
         margin-top: 15px;
         border-radius: 10px;
         font-size: 0.95em;
-        color: #065f46 !important;
-        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
-        border: 1px solid #bbf7d0;
+        color: #14532d !important;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(22, 163, 74, 0.15);
+        border: 1px solid #86efac;
     }
     .warning-box {
-        background: #fffbeb !important;
-        border-left: 5px solid #f59e0b !important;
+        background: #fef3c7 !important;
+        border-left: 5px solid #d97706 !important;
         padding: 14px 18px;
         margin-top: 15px;
         border-radius: 10px;
         font-size: 0.92em;
-        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
-        color: #92400e !important;
-        border: 1px solid #fde68a;
+        box-shadow: 0 1px 3px rgba(217, 119, 6, 0.15);
+        color: #78350f !important;
+        font-weight: 600;
+        border: 1px solid #fcd34d;
     }
     """
 
