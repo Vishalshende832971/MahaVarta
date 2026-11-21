@@ -83,12 +83,80 @@ def get_supported_labels() -> dict:
     return pipe.model.config.id2label
 
 
+def chunk_text_spans(text: str, max_words_per_chunk: int = 100) -> list[tuple[str, int]]:
+    """
+    Split text into chunks of at most max_words_per_chunk words while preserving
+    exact substring slices from `text` with their start character offset.
+
+    Prioritises sentence boundaries (।, ॥, ?, !, ., \\n) so entities are not
+    severed, falling back to word boundaries for exceptionally long sentences.
+    """
+    if not text or not text.strip():
+        return []
+
+    words = text.split()
+    if len(words) <= max_words_per_chunk:
+        return [(text, 0)]
+
+    # Match sentences ending with punctuation or newlines
+    sentence_pattern = re.compile(r"[^।॥?!\.\n]+(?:[।॥?!\.\n]+|\Z)", re.MULTILINE)
+    matches = list(sentence_pattern.finditer(text))
+
+    if not matches:
+        return [(text, 0)]
+
+    chunks = []
+    current_start = None
+    current_end = None
+    current_words = 0
+
+    for m in matches:
+        s_text = m.group()
+        if not s_text.strip():
+            continue
+        s_start = m.start()
+        s_end = m.end()
+        s_words = len(s_text.split())
+
+        # If a single sentence exceeds the chunk budget, sub-chunk it on word boundaries
+        if s_words > max_words_per_chunk:
+            if current_start is not None:
+                chunks.append((text[current_start:current_end], current_start))
+                current_start = None
+                current_end = None
+                current_words = 0
+
+            word_matches = list(re.finditer(r"\S+", s_text))
+            for i in range(0, len(word_matches), max_words_per_chunk):
+                w_sub = word_matches[i : i + max_words_per_chunk]
+                w_start = s_start + w_sub[0].start()
+                w_end = s_start + w_sub[-1].end()
+                chunks.append((text[w_start:w_end], w_start))
+            continue
+
+        if current_start is not None and (current_words + s_words > max_words_per_chunk):
+            chunks.append((text[current_start:current_end], current_start))
+            current_start = s_start
+            current_end = s_end
+            current_words = s_words
+        else:
+            if current_start is None:
+                current_start = s_start
+            current_end = s_end
+            current_words += s_words
+
+    if current_start is not None:
+        chunks.append((text[current_start:current_end], current_start))
+
+    return chunks
+
+
 def extract_entities(text: str) -> list[dict]:
     """
     Extract named entities from Marathi text with aggregated entity spans.
 
-    Handles text of arbitrary length by segmenting on word/sentence boundaries
-    so that words are never split across chunks.
+    Handles text of arbitrary length by segmenting on sentence and word boundaries
+    without altering whitespace or character indices, ensuring exact span alignment.
 
     Args:
         text: Input Marathi text string.
@@ -102,25 +170,8 @@ def extract_entities(text: str) -> list[dict]:
 
     pipe = load_model()
 
-    # The model max tokens is 512.
-    # Chunk long texts at word boundaries (~300 words per chunk for safety)
-    words = text.split()
-    chunk_size_words = 250
-
-    if len(words) <= chunk_size_words:
-        chunks = [(text, 0)]
-    else:
-        chunks = []
-        current_offset = 0
-        for i in range(0, len(words), chunk_size_words):
-            chunk_words = words[i : i + chunk_size_words]
-            chunk_str = " ".join(chunk_words)
-            # Find actual start position of this chunk in original text
-            start_pos = text.find(chunk_str, current_offset)
-            if start_pos == -1:
-                start_pos = current_offset
-            chunks.append((chunk_str, start_pos))
-            current_offset = start_pos + len(chunk_str)
+    # Chunk long texts cleanly preserving exact character offsets
+    chunks = chunk_text_spans(text, max_words_per_chunk=100)
 
     entities = []
     seen_spans = set()
@@ -149,20 +200,25 @@ def extract_entities(text: str) -> list[dict]:
 
             abs_start = chunk_offset + int(ent["start"])
             abs_end = chunk_offset + int(ent["end"])
+
+            # Verify against actual slice of text for precise boundary
+            actual_text = text[abs_start:abs_end] if abs_start < len(text) and abs_end <= len(text) else ent_word
+            display_word = actual_text if actual_text.strip() else ent_word
+
             span_key = (abs_start, abs_end, label)
 
             if span_key not in seen_spans:
                 seen_spans.add(span_key)
                 entities.append({
-                    "text": ent_word,
+                    "text": display_word,
                     "label": str(label),
                     "score": round(float(ent.get("score", 1.0)), 4),
                     "start": abs_start,
                     "end": abs_end,
                 })
 
-    # Sort entities by their starting position in text
-    entities.sort(key=lambda x: x["start"])
+    # Sort entities strictly by their starting position in text
+    entities.sort(key=lambda x: (x["start"], x["end"]))
     return entities
 
 

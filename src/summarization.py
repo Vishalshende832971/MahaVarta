@@ -468,60 +468,50 @@ def chunked_mt5_summary(
 
     # Summarise each chunk
     chunk_summaries = []
+    chunk_max_len = max(max_length, 84)
+    chunk_min_len = max(min_length // 2, 25)
+
     for i, chunk in enumerate(chunks, 1):
         chunk_res = mt5_summary(
             chunk,
-            max_length=max_length,
-            min_length=min(min_length, 20),
+            max_length=chunk_max_len,
+            min_length=chunk_min_len,
             num_beams=num_beams,
             length_penalty=length_penalty,
             no_repeat_ngram_size=no_repeat_ngram_size,
             model_name=model_name,
         )
-        chunk_summaries.append(chunk_res["summary"])
+        s_text = chunk_res["summary"].strip()
+        if s_text and "लहान किंवा रिक्त" not in s_text:
+            chunk_summaries.append(s_text)
 
-    # Hierarchical second-pass reduction
+    if not chunk_summaries:
+        chunk_summaries = [chunk_res["summary"]]
+
+    # For multi-chunk long articles, concatenating the individual chunk summaries
+    # ensures full coverage across every section of the article without collapsing
+    # into a brief 1-2 sentence snippet.
     joined_summary = " ".join(chunk_summaries)
-    reduction_attempts = 0
-    final_summary = joined_summary
+    tokens_in_joined = len(tokenizer.encode(WHITESPACE_HANDLER(joined_summary), add_special_tokens=False))
 
-    while reduction_attempts < 2:
-        tokens_in_joined = len(tokenizer.encode(WHITESPACE_HANDLER(joined_summary), add_special_tokens=False))
-        if tokens_in_joined <= 512:
-            # Summarise joined text into one cohesive final summary
-            final_res = mt5_summary(
-                joined_summary,
-                max_length=max_length,
-                min_length=min_length,
-                num_beams=num_beams,
-                length_penalty=length_penalty,
-                no_repeat_ngram_size=no_repeat_ngram_size,
-                model_name=model_name,
-            )
-            final_summary = final_res["summary"]
-            break
-        else:
-            # Re-chunk intermediate summaries
-            sub_sents = split_sentences(joined_summary)
-            sub_chunks = chunk_sentences(sub_sents, max_chunk_tokens=max_chunk_tokens)
-            if len(sub_chunks) >= len(chunk_summaries):
-                # Cannot reduce further; fallback to joined summaries
-                final_summary = joined_summary
-                break
-            chunk_summaries = [
-                mt5_summary(
-                    sc,
-                    max_length=max_length,
-                    min_length=min(min_length, 20),
-                    num_beams=num_beams,
-                    length_penalty=length_penalty,
-                    no_repeat_ngram_size=no_repeat_ngram_size,
-                    model_name=model_name,
-                )["summary"]
-                for sc in sub_chunks
-            ]
-            joined_summary = " ".join(chunk_summaries)
-            reduction_attempts += 1
+    if tokens_in_joined > 512:
+        # If joined chunk summaries exceed 512 tokens, run a hierarchical reduction
+        # with a scaled token budget proportional to article length.
+        scaled_max = min(350, max(max_length, len(chunks) * 60))
+        scaled_min = min(180, max(min_length, len(chunks) * 30))
+        final_res = mt5_summary(
+            joined_summary,
+            max_length=scaled_max,
+            min_length=scaled_min,
+            num_beams=num_beams,
+            length_penalty=length_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            model_name=model_name,
+        )
+        final_summary = final_res["summary"]
+    else:
+        # Full multi-sentence abstractive summary preserved across all chunks
+        final_summary = joined_summary
 
     elapsed = round(time.time() - t0, 2)
     return {

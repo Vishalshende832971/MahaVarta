@@ -570,44 +570,52 @@ def load_rouge_tables():
 
 def build_app():
     custom_css = """
-    /* Modern Glassmorphic Hero Banner */
+    /* Force Pristine Light Mode Across All Browsers & Systems */
+    :root, body, .gradio-container, .dark, body.dark {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+    }
+    .dark .gradio-container, .dark .block, .dark .panel {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+    }
+
+    /* Modern Light Academic Hero Banner */
     .hero-banner {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
-        padding: 30px 24px;
-        border-radius: 18px;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 50%, #e0e7ff 100%);
+        padding: 28px 24px;
+        border-radius: 16px;
         text-align: center;
-        color: #ffffff;
+        color: #0f172a;
         margin-bottom: 24px;
-        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.3), 0 4px 10px -2px rgba(15, 23, 42, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+        border: 1px solid #c7d2fe;
+        border-top: 4px solid #4f46e5;
     }
     .hero-badge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(8px);
+        background: #eef2ff;
         padding: 6px 18px;
         border-radius: 9999px;
         font-size: 0.88rem;
-        font-weight: 600;
+        font-weight: 700;
         letter-spacing: 0.03em;
         margin-bottom: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #e2e8f0;
+        border: 1px solid #c7d2fe;
+        color: #4338ca;
     }
     .hero-title {
-        font-size: 2.4rem !important;
+        font-size: 2.35rem !important;
         font-weight: 800 !important;
         letter-spacing: -0.02em;
         margin: 0 0 8px 0 !important;
-        background: linear-gradient(120deg, #ffffff 0%, #cbd5e1 40%, #93c5fd 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #1e1b4b !important;
     }
     .hero-subtitle {
-        font-size: 1.15rem;
-        color: #94a3b8;
-        margin: 0 0 18px 0;
-        font-weight: 400;
+        font-size: 1.12rem;
+        color: #475569;
+        margin: 0 0 16px 0;
+        font-weight: 500;
     }
     .hero-meta {
         display: flex;
@@ -617,31 +625,31 @@ def build_app():
         font-size: 0.88rem;
     }
     .meta-item {
-        background: rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(4px);
+        background: #ffffff;
         padding: 6px 14px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #cbd5e1;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
     .meta-item b {
-        color: #38bdf8;
+        color: #1d4ed8;
     }
 
     /* Primary Action Button */
     .primary-btn {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
         border: none !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 15px 0 rgba(79, 70, 229, 0.4) !important;
-        transition: all 0.25s ease-in-out !important;
+        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35) !important;
+        transition: all 0.2s ease-in-out !important;
         padding: 12px 24px !important;
     }
     .primary-btn:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.55) !important;
+        box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.5) !important;
     }
 
     /* Executive Summary KPI Dashboard Cards */
@@ -652,55 +660,39 @@ def build_app():
         margin-bottom: 22px;
         margin-top: 10px;
     }
-    .kpi-card {
-        background: rgba(248, 250, 252, 0.9);
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 14px 18px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    .kpi-card, .dark .kpi-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 14px 18px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
     }
-    .dark .kpi-card {
-        background: rgba(30, 41, 59, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    .kpi-title, .dark .kpi-title {
+        font-size: 0.76rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: #64748b !important;
+        font-weight: 700 !important;
+        margin-bottom: 6px !important;
     }
-    .kpi-title {
-        font-size: 0.76rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748b;
-        font-weight: 700;
-        margin-bottom: 6px;
+    .kpi-value, .dark .kpi-value {
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
     }
-    .dark .kpi-title {
-        color: #94a3b8;
-    }
-    .kpi-value {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #0f172a;
-    }
-    .dark .kpi-value {
-        color: #f8fafc;
-    }
-    .category-badge {
+    .category-badge, .dark .category-badge {
         display: inline-block;
-        background: #e0e7ff;
-        color: #4338ca;
+        background: #e0e7ff !important;
+        color: #3730a3 !important;
         padding: 4px 12px;
         border-radius: 8px;
         font-weight: 800;
-        border: 1px solid rgba(67, 56, 202, 0.2);
-    }
-    .dark .category-badge {
-        background: #312e81;
-        color: #c7d2fe;
-        border: 1px solid rgba(199, 210, 254, 0.2);
+        border: 1px solid rgba(67, 56, 202, 0.25) !important;
     }
     .sentiment-pos {
         color: #16a34a !important;
@@ -715,31 +707,48 @@ def build_app():
         font-weight: 800;
     }
 
+    /* Inputs and Tables Light Mode */
+    .dark input, .dark textarea, .dark select, input, textarea {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    .dark table, table {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+    .dark tr, tr {
+        background-color: #ffffff !important;
+    }
+
     /* Alert and Note Callout Boxes */
     .alert-box {
-        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-        border-left: 5px solid #10b981;
+        background: #f0fdf4 !important;
+        border-left: 5px solid #10b981 !important;
         padding: 14px 18px;
         margin-top: 15px;
         border-radius: 10px;
         font-size: 0.95em;
-        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.08);
+        color: #065f46 !important;
+        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+        border: 1px solid #bbf7d0;
     }
     .warning-box {
-        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        border-left: 5px solid #f59e0b;
+        background: #fffbeb !important;
+        border-left: 5px solid #f59e0b !important;
         padding: 14px 18px;
         margin-top: 15px;
         border-radius: 10px;
         font-size: 0.92em;
-        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.08);
-        color: #92400e;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.1);
+        color: #92400e !important;
+        border: 1px solid #fde68a;
     }
     """
 
     soft_theme = gr.themes.Soft(
         primary_hue="indigo",
-        secondary_hue="amber",
+        secondary_hue="blue",
         neutral_hue="slate",
     )
 
@@ -859,8 +868,8 @@ def build_app():
 
                                 with gr.Accordion("⚙️ mT5 जनरेशन पॅरामीटर्स (Generation Controls)", open=False):
                                     with gr.Row():
-                                        mt5_max_len = gr.Slider(minimum=30, maximum=150, value=84, step=2, label="Max Length")
-                                        mt5_min_len = gr.Slider(minimum=10, maximum=80, value=30, step=2, label="Min Length")
+                                        mt5_max_len = gr.Slider(minimum=50, maximum=300, value=150, step=5, label="Max Length (कमाल लांबी)")
+                                        mt5_min_len = gr.Slider(minimum=20, maximum=150, value=50, step=5, label="Min Length (किमान लांबी)")
                                     with gr.Row():
                                         mt5_beams = gr.Slider(minimum=1, maximum=8, value=4, step=1, label="Num Beams")
                                         mt5_len_penalty = gr.Slider(minimum=0.5, maximum=2.0, value=1.0, step=0.1, label="Length Penalty")
