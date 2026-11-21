@@ -588,22 +588,76 @@ def build_app():
     * {
         font-family: 'Plus Jakarta Sans', 'Yantramanav', system-ui, -apple-system, sans-serif !important;
     }
-    /* Force Dark, Crisp High-Contrast Text Everywhere */
-    :root, .gradio-container, .dark, body.dark {
-        --body-text-color: #0f172a !important;
-        --body-text-color-subdued: #1e293b !important;
+
+    /* Force Light Mode & Overwrite Gradio CSS Variables */
+    :root, .gradio-container, .dark, body.dark, html.dark {
+        --body-background-fill: #f8fafc !important;
+        --background-fill-primary: #ffffff !important;
+        --background-fill-secondary: #f1f5f9 !important;
+        --block-background-fill: #ffffff !important;
+        --block-border-color: #cbd5e1 !important;
+        --block-label-background-fill: transparent !important;
+        --block-label-border-color: transparent !important;
+        --block-label-border-width: 0px !important;
+        --block-label-shadow: none !important;
         --block-label-text-color: #0f172a !important;
+        --block-title-background-fill: transparent !important;
         --block-title-text-color: #0f172a !important;
+        --body-text-color: #0f172a !important;
+        --body-text-color-subdued: #334155 !important;
+        --input-background-fill: #ffffff !important;
+        --input-border-color: #94a3b8 !important;
         --input-text-color: #0f172a !important;
-        --input-placeholder-color: #475569 !important;
+        --input-placeholder-color: #64748b !important;
         --table-text-color: #0f172a !important;
-        --checkbox-label-text-color: #0f172a !important;
+        --table-odd-background-fill: #ffffff !important;
+        --table-even-background-fill: #f8fafc !important;
+        --table-row-focus: #e0e7ff !important;
+        --table-border-color: #cbd5e1 !important;
+        --border-color-primary: #cbd5e1 !important;
+        --border-color-accent: #818cf8 !important;
+        --panel-background-fill: #ffffff !important;
         background-color: #f8fafc !important;
         color: #0f172a !important;
     }
-    .dark .gradio-container, .dark .block, .dark .panel {
+    .dark .gradio-container, .dark .block, .dark .panel, .dark .form {
         background-color: #f8fafc !important;
         color: #0f172a !important;
+    }
+
+    /* Clean Transparent Block Labels (No Solid Blue Background Bar) */
+    .block > label, .block > .label, label.block, [data-testid="block-label"], .label-wrap, .wrap label, span.block-title, label, .block-title {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 0 6px 0 !important;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+    }
+    .block > label *, .block > .label *, label.block *, [data-testid="block-label"] *, .label-wrap *, label * {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        padding: 0 !important;
+    }
+
+    /* All Markdown Code Blocks & Inline Code (Fixes Black Censor Bar) */
+    code, pre, pre code, kbd, .prose code, .markdown code, code *, .code-block, pre * {
+        background-color: #eef2ff !important;
+        background: #eef2ff !important;
+        color: #312e81 !important;
+        border: 1px solid #c7d2fe !important;
+        padding: 2px 7px !important;
+        border-radius: 5px !important;
+        font-weight: 800 !important;
+        font-size: 0.9em !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+        display: inline-block !important;
     }
 
     /* All Text, Paragraphs, Headings and Markdown */
@@ -618,14 +672,17 @@ def build_app():
         color: #1e293b !important;
         font-weight: 700 !important;
     }
+    blockquote {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        background: #f1f5f9 !important;
+        border-left: 4px solid #4f46e5 !important;
+        padding: 12px 16px !important;
+        border-radius: 6px !important;
+    }
 
     /* Form Labels, Accordions & Block Titles */
-    label, label span, .block-title, .block-label, .wrap label, .form label {
-        color: #0f172a !important;
-        font-weight: 800 !important;
-        font-size: 0.95rem !important;
-    }
-    details, details summary, .label-accordion, .accordion-title {
+    details, details summary, .label-accordion, .accordion-title, button.accordion-header {
         color: #0f172a !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
@@ -649,7 +706,7 @@ def build_app():
     }
 
     /* Inputs, Textareas, Numbers & Placeholders */
-    input, textarea, input[type="text"], input[type="number"], .input-wrap {
+    input, textarea, input[type="text"], input[type="number"], .input-wrap, .dark input, .dark textarea {
         color: #0f172a !important;
         font-weight: 600 !important;
         background-color: #ffffff !important;
@@ -657,7 +714,7 @@ def build_app():
         border-radius: 10px !important;
     }
     ::placeholder, input::placeholder, textarea::placeholder {
-        color: #475569 !important;
+        color: #64748b !important;
         opacity: 1 !important;
         font-weight: 500 !important;
     }
@@ -701,121 +758,165 @@ def build_app():
     }
     .brand-devanagari {
         color: #4f46e5;
-        font-weight: 800;
+        font-weight: 900;
     }
     .brand-tagline {
-        font-size: 0.85rem;
-        color: #1e293b;
+        font-size: 0.88rem;
         font-weight: 600;
+        color: #475569;
         margin-top: 2px;
     }
     .nav-badges {
         display: flex;
+        align-items: center;
         flex-wrap: wrap;
         gap: 8px;
-        align-items: center;
     }
     .nav-pill {
-        padding: 5px 12px;
-        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
         font-size: 0.82rem;
         font-weight: 700;
+        letter-spacing: 0.01em;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         border: 1px solid transparent;
-        white-space: nowrap;
     }
-    .badge-primary { background: #e0e7ff; color: #312e81 !important; border-color: #a5b4fc; }
-    .badge-info { background: #e0f2fe; color: #075985 !important; border-color: #7dd3fc; }
-    .badge-accent { background: #fef3c7; color: #78350f !important; border-color: #fcd34d; }
-    .badge-purple { background: #f3e8ff; color: #581c87 !important; border-color: #d8b4fe; }
-    .badge-author { background: #e2e8f0; color: #0f172a !important; border-color: #94a3b8; font-weight: 800; }
+    .badge-primary { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+    .badge-info { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    .badge-accent { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+    .badge-author { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; font-weight: 800; }
 
-    /* High-Impact Primary Action Button */
-    .primary-btn {
-        background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
-        color: #ffffff !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        border: none !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4) !important;
-        transition: all 0.2s ease-in-out !important;
-        padding: 12px 24px !important;
-    }
-    .primary-btn:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.55) !important;
-    }
-
-    /* Executive KPI Dashboard Cards (2x2 Fixed Grid) */
-    .kpi-grid {
+    /* Overview Executive KPI Cards */
+    .kpi-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         gap: 12px;
         margin-bottom: 16px;
     }
-    @media (max-width: 600px) {
-        .kpi-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    .kpi-card, .dark .kpi-card {
-        background: #ffffff !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        padding: 14px 16px !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    .kpi-card {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
         transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.12);
+        border-color: #818cf8;
     }
-    .card-cat { border-left: 5px solid #4f46e5 !important; }
-    .card-sent { border-left: 5px solid #0284c7 !important; }
-    .card-topic { border-left: 5px solid #0d9488 !important; }
-    .card-stats { border-left: 5px solid #475569 !important; }
-
-    .kpi-title, .dark .kpi-title {
-        font-size: 0.78rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        color: #0f172a !important;
-        font-weight: 800 !important;
-        margin-bottom: 4px !important;
+    .kpi-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
     }
-    .kpi-value, .dark .kpi-value {
-        font-size: 1.25rem !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        line-height: 1.3;
+    .kpi-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
     }
     .kpi-sub {
-        font-size: 0.82rem;
-        color: #1e293b !important;
-        margin-top: 4px;
-        font-weight: 700;
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 3px;
+        font-weight: 600;
     }
-    .category-badge, .dark .category-badge {
-        display: inline-block;
-        background: #eef2ff !important;
-        color: #312e81 !important;
+
+    /* Executive Assessment Hero Banner */
+    .hero-banner {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-left: 6px solid #4f46e5;
+    }
+    .hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .hero-pretitle {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .hero-category {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+    .hero-score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #e0e7ff;
+        color: #3730a3;
+        font-weight: 800;
+        font-size: 0.82rem;
+        padding: 3px 10px;
+        border-radius: 6px;
+        margin-top: 4px;
+        width: fit-content;
+        border: 1px solid #c7d2fe;
+    }
+    .hero-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .sentiment-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        background: #f1f5f9;
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: 1.5px solid #cbd5e1;
+    }
+    .sentiment-label-text {
+        font-size: 0.74rem;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+    }
+    .sentiment-val {
+        font-size: 1.15rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .topic-pill {
+        background: #e0e7ff;
+        color: #3730a3 !important;
         padding: 4px 14px;
         border-radius: 8px;
         font-weight: 800;
         border: 1.5px solid #818cf8 !important;
     }
-    .sentiment-pos {
-        color: #15803d !important;
-        font-weight: 800;
-    }
-    .sentiment-neu {
-        color: #b45309 !important;
-        font-weight: 800;
-    }
-    .sentiment-neg {
-        color: #b91c1c !important;
-        font-weight: 800;
-    }
+    .sentiment-pos { color: #15803d !important; font-weight: 800; }
+    .sentiment-neu { color: #b45309 !important; font-weight: 800; }
+    .sentiment-neg { color: #b91c1c !important; font-weight: 800; }
 
     /* Executive Box & Entity Pills */
     .executive-box {
@@ -858,7 +959,7 @@ def build_app():
     }
 
     /* Clean, Visible Tab Navigation Buttons */
-    .tabs > .tab-nav, div[role="tablist"] {
+    .tabs > .tab-nav, div[role="tablist"], [role="tablist"] {
         border-bottom: 2px solid #cbd5e1 !important;
         gap: 6px !important;
         background: #ffffff !important;
@@ -866,21 +967,26 @@ def build_app():
         border-radius: 12px 12px 0 0 !important;
         display: flex !important;
         flex-wrap: wrap !important;
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
     }
-    .tabs > .tab-nav button, div[role="tablist"] button {
+    .tabs > .tab-nav button, div[role="tablist"] button, [role="tablist"] button {
         color: #0f172a !important;
         font-weight: 800 !important;
-        font-size: 0.9rem !important;
-        padding: 8px 16px !important;
+        font-size: 0.88rem !important;
+        padding: 7px 13px !important;
         border-radius: 8px !important;
-        border: 1px solid #cbd5e1 !important;
-        background: #e2e8f0 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        background: #f1f5f9 !important;
         transition: all 0.15s ease !important;
         white-space: nowrap !important;
+        cursor: pointer !important;
     }
     .tabs > .tab-nav button:hover, div[role="tablist"] button:hover {
-        color: #0f172a !important;
-        background: #cbd5e1 !important;
+        color: #1e1b4b !important;
+        background: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
     }
     .tabs > .tab-nav button.selected, div[role="tablist"] button[aria-selected="true"], div[role="tablist"] button.selected {
         color: #ffffff !important;
@@ -890,26 +996,73 @@ def build_app():
         box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4) !important;
     }
 
-    /* Crisp White Dataframes & Tables (Overrides Dark Mode) */
-    .dataframe, table, .table-wrap, .table-wrap * {
+    /* Tab Overflow Menu Popup (...) - Clean White & Dark Readable Text */
+    .tab-nav-menu,
+    button.tab-nav-menu,
+    .tab-nav-menu-wrapper,
+    .tab-nav-menu-list,
+    .tab-nav-dropdown,
+    [data-testid*="overflow"],
+    [data-testid*="tab-menu"],
+    [data-testid*="dropdown-options"],
+    .tabs div[role="menu"],
+    .tabs ul[role="menu"],
+    div[role="menu"],
+    ul[role="menu"],
+    .dropdown-content,
+    div[style*="position: absolute"] > ul,
+    div[style*="position: absolute"] > div {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+        color: #0f172a !important;
+        z-index: 9999 !important;
+    }
+    .tab-nav-menu *,
+    button.tab-nav-menu *,
+    .tab-nav-menu-wrapper *,
+    .tab-nav-menu-list *,
+    .tab-nav-dropdown *,
+    div[role="menu"] *,
+    ul[role="menu"] *,
+    .dropdown-content * {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+    div[role="menu"] button:hover,
+    div[role="menu"] li:hover,
+    ul[role="menu"] button:hover,
+    ul[role="menu"] li:hover,
+    .tab-nav-menu-list button:hover,
+    .tab-nav-menu-list li:hover {
+        background-color: #e0e7ff !important;
+        color: #3730a3 !important;
+    }
+
+    /* Crisp White Dataframes & Tables */
+    .dataframe, table, .table-wrap, .table-wrap *, .gr-table, .gr-table *, tbody, thead, tr {
         background-color: #ffffff !important;
         color: #0f172a !important;
     }
-    table th, .table-wrap th {
+    table th, .table-wrap th, thead th, .gr-table th {
         background-color: #f1f5f9 !important;
         color: #0f172a !important;
         font-weight: 800 !important;
         border-bottom: 2px solid #94a3b8 !important;
+        border-top: 1px solid #cbd5e1 !important;
         font-size: 0.88rem !important;
     }
-    table td, .table-wrap td {
+    table td, .table-wrap td, tbody td, .gr-table td {
         background-color: #ffffff !important;
         color: #0f172a !important;
         font-weight: 600 !important;
         border-bottom: 1px solid #e2e8f0 !important;
         font-size: 0.88rem !important;
     }
-    table tr:hover td {
+    table tr:hover td, .table-wrap tr:hover td {
         background-color: #f8fafc !important;
     }
 
@@ -949,44 +1102,6 @@ def build_app():
         font-weight: 700 !important;
     }
 
-    /* High-Contrast Readability for All Markdown, Labels & Disclaimers */
-    p, span, div, li, strong, b, h1, h2, h3, h4, h5, h6 {
-        color: #0f172a !important;
-    }
-    em, i {
-        color: #1e293b !important;
-        font-weight: 700 !important;
-    }
-    blockquote {
-        color: #0f172a !important;
-        font-weight: 600 !important;
-        background: #f1f5f9 !important;
-        border-left: 4px solid #4f46e5 !important;
-        padding: 12px 16px !important;
-        border-radius: 6px !important;
-    }
-    label span, .block label, .form label, .wrap label {
-        color: #0f172a !important;
-        font-weight: 800 !important;
-        font-size: 0.95rem !important;
-    }
-
-    /* Inputs, Textareas and Tables */
-    .dark input, .dark textarea, .dark select, input, textarea {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1.5px solid #94a3b8 !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-    }
-    .dark table, table {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-    }
-    .dark tr, tr {
-        background-color: #ffffff !important;
-    }
-
     /* Alert and Note Callout Boxes */
     .alert-box {
         background: #dcfce7 !important;
@@ -1024,6 +1139,17 @@ def build_app():
         gr.HTML(
             f"""
             <style>{custom_css}</style>
+            <script>
+                function forceLightMode() {{
+                    document.documentElement.classList.remove('dark');
+                    document.body.classList.remove('dark');
+                    document.querySelectorAll('.gradio-container, .dark').forEach(function(el) {{
+                        el.classList.remove('dark');
+                    }});
+                }}
+                forceLightMode();
+                setInterval(forceLightMode, 300);
+            </script>
             <div class="top-nav-bar">
                 <div class="nav-brand">
                     <div class="brand-icon">📰</div>
@@ -1096,11 +1222,11 @@ def build_app():
             with gr.Column(scale=6):
                 with gr.Tabs():
                     # Tab 1: Overview
-                    with gr.Tab("📌 आढावा (Overview)"):
+                    with gr.Tab("📌 आढावा"):
                         overview_output = gr.Markdown("बातमीचे विश्लेषण करण्यासाठी डावीकडील **Analyse Article** बटण दाबा.")
 
                     # Tab 2: Classification
-                    with gr.Tab("🏷️ वर्गवारी (Classification)"):
+                    with gr.Tab("🏷️ वर्गवारी"):
                         gr.Markdown("### 🏆 सर्वोच्च ३ संभाव्य वर्ग आणि वर्गवारी गुण (Top-3 Categories & Scores)")
                         gr.Markdown(
                             "*टीप: हे गुण Linear SVM निर्णय फलन (decision function) वर आधारित मॉडेल वर्गवारी गुण आहेत (हे संभाव्यता किंवा कॉन्फिडन्स नाहीत).*"
@@ -1120,11 +1246,11 @@ def build_app():
                         )
 
                     # Tab 3: Summary (Full-Width Tabs: TextRank & mT5)
-                    with gr.Tab("📋 सारांश (Summary)"):
+                    with gr.Tab("📋 सारांश"):
                         gr.Markdown("### 📑 बातमीचा बहु-मॉडेल सारांश (Multi-Model Summarization)")
                         with gr.Tabs():
                             # Sub-tab 1: Extractive TextRank
-                            with gr.Tab("🔹 १. TextRank एक्स्ट्रॅक्टिव्ह सारांश (Extractive)"):
+                            with gr.Tab("🔹 TextRank (Extractive)"):
                                 gr.Markdown("*लेखातील सर्वाधिक मध्यवर्ती/महत्त्वाच्या मूळ वाक्यांची निवड (TF-IDF + Cosine Graph + PageRank Centrality):*")
                                 summary_output = gr.Textbox(
                                     label="TextRank Summary (Extractive)",
@@ -1132,7 +1258,7 @@ def build_app():
                                 )
 
                             # Sub-tab 2: Abstractive mT5
-                            with gr.Tab("🔸 २. mT5 ॲब्स्ट्रॅक्टिव्ह सारांश (Deep Learning Abstractive)"):
+                            with gr.Tab("🔸 mT5 (Abstractive)"):
                                 gr.Markdown("*`csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत तयार केलेला सारांश:*")
                                 btn_generate_mt5 = gr.Button(
                                     "✨ Generate mT5 Summary",
@@ -1157,7 +1283,7 @@ def build_app():
                                         mt5_ngram_size = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="No Repeat N-gram")
 
                     # Tab 4: News Brief (Qwen3 Prompt-Engineered Brief with Sub-tabs)
-                    with gr.Tab("📰 बातम्या संक्षेप (News Brief - Qwen3)"):
+                    with gr.Tab("📰 संक्षेप"):
                         gr.Markdown("### ⚡ Qwen3-0.6B प्रॉम्प्ट-इंजिनिअर्ड बातम्या संक्षेप (News Brief)")
                         gr.Markdown(
                             "*लहान भाषा मॉडेल (`Qwen/Qwen3-0.6B`) वापरून बातमीचे शीर्षक आणि ३ महत्त्वाचे मुद्दे संक्षेप रूपात तयार करा:*"
@@ -1212,7 +1338,7 @@ def build_app():
                         )
 
                     # Tab 5: Sentiment
-                    with gr.Tab("🎭 भावना विश्लेषण (Sentiment)"):
+                    with gr.Tab("🎭 भावना"):
                         sentiment_label_out = gr.Markdown("भावना विश्लेषणासाठी लेख प्रविष्ट करा.")
                         gr.Markdown("#### सर्व भावनांचे मॉडेल भाकीत गुण (Model Prediction Scores by Class):")
                         sentiment_scores_out = gr.Dataframe(
@@ -1230,7 +1356,7 @@ def build_app():
                         )
 
                     # Tab 5: Named Entity Recognition
-                    with gr.Tab("👥 नामित घटक (Entities - NER)"):
+                    with gr.Tab("👥 घटक (NER)"):
                         gr.Markdown("### 🔍 लेखातील नामित घटक (Extracted Named Entities in Context)")
                         gr.Markdown("*मजकुरात ओळखलेले घटक वेगवेगळ्या रंगांमध्ये हायलाइट केलेले आहेत:*")
                         ner_highlight_out = gr.HighlightedText(
@@ -1250,7 +1376,7 @@ def build_app():
                         )
 
                     # Tab 6: Topic Modelling (LDA)
-                    with gr.Tab("🎯 विषय शोध (Topics - LDA)"):
+                    with gr.Tab("🎯 विषय (LDA)"):
                         gr.Markdown("### 🔍 बातमीचे प्रमुख विषय (Discovered Topics & Topic Weights)")
                         gr.Markdown(
                             "*टीप: हे गुण LDA (Latent Dirichlet Allocation) मॉडेलनुसार लेखातील संभाव्यता विषय भार (Topic Weight) दर्शवतात.*"
@@ -1270,7 +1396,7 @@ def build_app():
                         )
 
                     # Tab 7: Preprocessing (CO1 Demonstration)
-                    with gr.Tab("⚙️ मजकूर पूर्वप्रक्रिया (Preprocessing - CO1)"):
+                    with gr.Tab("⚙️ पूर्वप्रक्रिया"):
                         gr.Markdown("### 🔬 CO1 प्रात्यक्षिक: युनिकोड नॉर्मलायझेशन, क्लीनिंग, टोकनायझेशन आणि TF-IDF")
                         with gr.Accordion("१. मूळ मजकूर (Original Input Text)", open=False):
                             orig_text_out = gr.Textbox(label="Original Text (Untouched for Transformers)", lines=4)
@@ -1287,7 +1413,7 @@ def build_app():
                             )
 
                     # Tab 8: Evaluation (ROUGE results)
-                    with gr.Tab("📊 मूल्यमापन (Evaluation)"):
+                    with gr.Tab("📊 मूल्यमापन"):
                         gr.Markdown(
                             "### ROUGE evaluation of summarisation methods\n"
                             "Scores are F-measures against human-written Marathi reference "
