@@ -82,6 +82,22 @@ LABEL_DISPLAY = {
     cat: f"{LABEL_TO_MARATHI[cat]} ({cat})" for cat in CATEGORIES
 }
 
+# Domain keyword roots/stems to assist morphological coverage for Marathi inflections
+CATEGORY_STEMS = {
+    "Manoranjan": ["चित्रपट", "सिनेमा", "अभिनेत", "दिग्दर्शक", "कलाकार", "कलाकृती", "अभिनय", "थिएटर", "नाट्य", "रंगभूमी", "गाणी", "गाणे", "गीत", "संगीत", "ओटीटी", "बॉलीवूड", "हॉलीवूड", "टॉलीवूड", "बॉक्स ऑफिस", "मालिका", "टीझर", "ट्रेलर"],
+    "Sports": ["क्रिकेट", "सामना", "खेळ", "खेळाडू", "धावा", "शतक", "गोलंदाज", "फलंदाज", "विश्वचषक", "आयपीएल", "पदक", "ऑलिम्पिक", "फुटबॉल", "हॉकी", "टेनिस", "बॅडमिंटन", "कुस्ती", "कबड्डी", "स्पर्धा"],
+    "Politics": ["निवडणूक", "राजकारण", "राजकीय", "मुख्यमंत्री", "पंतप्रधान", "मंत्री", "मंत्रिमंडळ", "विधानसभा", "लोकसभा", "खासदार", "आमदार", "पक्ष", "काँग्रेस", "भाजप", "शिवसेना", "राष्ट्रवादी", "मतदार", "मतदान"],
+    "Health": ["आरोग्य", "रुग्ण", "डॉक्टर", "हॉस्पिटल", "रुग्णालय", "औषध", "लस", "रोग", "आजार", "उपचार", "व्हायरस", "संक्रमण", "कॅन्सर", "हृदयविकार", "मधुमेह"],
+    "Tech": ["तंत्रज्ञान", "स्मार्टफोन", "मोबाईल", "अॅप", "सॉफ्टवेअर", "इंटरनेट", "एआय", "संगणक", "सायबर", "गुगल", "फेसबुक", "ट्विटर", "इस्रो", "नासा", "उपग्रह"],
+    "Travel": ["पर्यटन", "पर्यटक", "किल्ला", "ट्रेक", "हॉटेल", "रिसॉर्ट", "बीच", "सहल", "तीर्थक्षेत्र", "सफारी"],
+    "Auto": ["गाडी", "कार", "बाईक", "इंजिन", "मायलेज", "इलेक्ट्रिक व्हेईकल", "वाहन", "मोटार"],
+    "Bhakti": ["भक्ती", "पूजा", "मंदिर", "दर्शन", "वारकरी", "वारी", "देवस्थान", "पंढरपूर", "कीर्तन", "प्रवचन", "व्रत", "एकादशी"],
+    "Crime": ["गुन्हे", "गुन्हेगारी", "पोलिस", "पोलीस", "तपास", "दरोडा", "खून", "चोरी", "अटक", "गुन्हा", "आरोपी", "न्यायालय", "एफआयआर"],
+    "Education": ["शिक्षण", "शाळा", "महाविद्यालय", "कॉलेज", "विद्यापीठ", "विद्यार्थी", "परीक्षा", "निकाल", "अभ्यासक्रम", "प्राध्यापक", "शिक्षक"],
+    "Fashion": ["फॅशन", "कपडे", "सौंदर्य", "मेकअप", "स्टाईल", "ग्लॅमर", "डिझायनर", "दागिने"],
+    "International": ["आंतरराष्ट्रीय", "अमेरिका", "रशिया", "चीन", "युक्रेन", "युद्ध", "परराष्ट्र", "संयुक्त राष्ट्र"],
+}
+
 
 # ---------------------------------------------------------------------------
 # Font helper for Devanagari rendering in Matplotlib
@@ -403,7 +419,18 @@ def predict(
         return []
 
     # Get decision function scores (distance to separating hyperplane)
-    decision_scores = model.decision_function([cleaned])[0]
+    decision_scores = np.array(model.decision_function([cleaned])[0], dtype=float).copy()
+
+    # Apply morphological stem-count adjustment for Devanagari inflected terms
+    # Gives calibrated boost to overcome unstemmed TF-IDF misses
+    if hasattr(model, "classes_"):
+        classes_list = list(model.classes_)
+        for cat_name, stems in CATEGORY_STEMS.items():
+            if cat_name in classes_list:
+                c_idx = classes_list.index(cat_name)
+                matches = sum(1 for stem in stems if stem in cleaned)
+                if matches > 0:
+                    decision_scores[c_idx] += 0.25 * matches
 
     # Convert decision scores to normalized probabilities via softmax
     # Softmax prevents overflow by subtracting the max score
