@@ -372,17 +372,6 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
         sents = split_sentences(article_text)
         words = article_text.split()
 
-        key_ents_summary = []
-        if extracted_ents:
-            grouped_quick = group_by_label(extracted_ents)
-            if "Person" in grouped_quick:
-                key_ents_summary.append(f"**व्यक्ती:** {', '.join(grouped_quick['Person'][:3])}")
-            if "Location" in grouped_quick:
-                key_ents_summary.append(f"**ठिकाणे:** {', '.join(grouped_quick['Location'][:3])}")
-            if "Organization" in grouped_quick:
-                key_ents_summary.append(f"**संघटना:** {', '.join(grouped_quick['Organization'][:3])}")
-
-        key_ents_str = " | ".join(key_ents_summary) if key_ents_summary else "काहीही नाही"
         sent_brief = sentiment_result.get("label", "N/A") if sentiment_result else "N/A"
         sent_brief_score = f"{sentiment_result.get('score', 0.0):.4f}" if sentiment_result else "0.0000"
 
@@ -392,32 +381,55 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
         elif "negative" in sent_brief.lower():
             sent_color_cls = "sentiment-neg"
 
+        # Structured entity badges
+        entity_badges_html = []
+        if extracted_ents:
+            grouped_quick = group_by_label(extracted_ents)
+            if "Person" in grouped_quick:
+                for p in grouped_quick["Person"][:4]:
+                    entity_badges_html.append(f'<span class="entity-pill pill-person">👤 {p}</span>')
+            if "Location" in grouped_quick:
+                for loc in grouped_quick["Location"][:4]:
+                    entity_badges_html.append(f'<span class="entity-pill pill-location">📍 {loc}</span>')
+            if "Organization" in grouped_quick:
+                for org in grouped_quick["Organization"][:4]:
+                    entity_badges_html.append(f'<span class="entity-pill pill-org">🏢 {org}</span>')
+
+        entity_pills_disp = " ".join(entity_badges_html) if entity_badges_html else '<span style="color:#94a3b8; font-size:0.9rem;">या बातमीत ठळक घटक आढळले नाहीत.</span>'
+
         overview_md = f"""
 <div class="kpi-grid">
-    <div class="kpi-card">
+    <div class="kpi-card card-cat">
         <div class="kpi-title">🏷️ अनुमानित मुख्य वर्ग (Predicted Category)</div>
         <div class="kpi-value"><span class="category-badge">{top_category_name}</span></div>
+        <div class="kpi-sub">Linear SVM (C=0.5, 87.74% Acc)</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card card-sent">
         <div class="kpi-title">🎭 अनुमानित भावना (Predicted Sentiment)</div>
-        <div class="kpi-value"><span class="{sent_color_cls}">● {sent_brief}</span> <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">({sent_brief_score})</span></div>
+        <div class="kpi-value"><span class="{sent_color_cls}">● {sent_brief}</span></div>
+        <div class="kpi-sub">मॉडेल भाकीत गुण: <b>{sent_brief_score}</b></div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card card-topic">
         <div class="kpi-title">🎯 प्रमुख शोधलेला विषय (Dominant Topic)</div>
-        <div class="kpi-value" style="font-size:1.05rem;">{top_topic_str}</div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#0f766e;">{top_topic_str}</div>
+        <div class="kpi-sub">18-Topic Unsupervised LDA Model</div>
     </div>
-    <div class="kpi-card">
-        <div class="kpi-title">📊 लेख सांख्यिकी (Article Stats)</div>
-        <div class="kpi-value" style="font-size:0.95rem;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये | <b>{len(article_text)}</b> अक्षरे</div>
+    <div class="kpi-card card-stats">
+        <div class="kpi-title">📊 बातमी सांख्यिकी (Article Stats)</div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#1e293b;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये</div>
+        <div class="kpi-sub">एकूण अक्षरे: {len(article_text)} | UTF-8 Devanagari</div>
     </div>
 </div>
 
-**👥 प्रमुख घटक (Key Entities):** {key_ents_str}
+<div class="executive-box">
+    <div class="box-title">👥 शोधलेले प्रमुख घटक (Key Extracted Entities)</div>
+    <div class="entity-container">{entity_pills_disp}</div>
+</div>
 
----
-
-#### 📝 संक्षिप्त मजकूर सारांश (TextRank Summary):
-> {summary_text}
+<div class="executive-box" style="margin-top: 14px;">
+    <div class="box-title">📝 संक्षिप्त मजकूर सारांश (TextRank Extractive Summary)</div>
+    <div class="summary-body">{summary_text}</div>
+</div>
 """
     except Exception as e:
         overview_md = f"Overview Error: {str(e)}"
@@ -570,7 +582,12 @@ def load_rouge_tables():
 
 def build_app():
     custom_css = """
-    /* Force Pristine Light Mode Across All Browsers & Systems */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Yantramanav:wght@400;500;600;700;900&display=swap');
+
+    /* Global Typography & Light Aesthetic */
+    * {
+        font-family: 'Plus Jakarta Sans', 'Yantramanav', system-ui, -apple-system, sans-serif !important;
+    }
     :root, body, .gradio-container, .dark, body.dark {
         background-color: #f8fafc !important;
         color: #0f172a !important;
@@ -580,67 +597,73 @@ def build_app():
         color: #0f172a !important;
     }
 
-    /* Modern Light Academic Hero Banner */
-    .hero-banner {
-        background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 50%, #e0e7ff 100%);
-        padding: 28px 24px;
+    /* Executive Top Navigation Header */
+    .top-nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 16px;
-        text-align: center;
-        color: #0f172a;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-        border: 1px solid #c7d2fe;
+        padding: 16px 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
         border-top: 4px solid #4f46e5;
     }
-    .hero-badge {
-        display: inline-block;
-        background: #eef2ff;
-        padding: 6px 18px;
-        border-radius: 9999px;
-        font-size: 0.88rem;
-        font-weight: 700;
-        letter-spacing: 0.03em;
-        margin-bottom: 12px;
-        border: 1px solid #c7d2fe;
-        color: #4338ca;
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
     }
-    .hero-title {
-        font-size: 2.35rem !important;
-        font-weight: 800 !important;
+    .brand-icon {
+        font-size: 2.2rem;
+        line-height: 1;
+    }
+    .brand-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0f172a;
         letter-spacing: -0.02em;
-        margin: 0 0 8px 0 !important;
-        color: #1e1b4b !important;
+        line-height: 1.2;
     }
-    .hero-subtitle {
-        font-size: 1.12rem;
-        color: #475569;
-        margin: 0 0 16px 0;
+    .brand-devanagari {
+        color: #4f46e5;
+        font-weight: 800;
+    }
+    .brand-tagline {
+        font-size: 0.85rem;
+        color: #64748b;
         font-weight: 500;
+        margin-top: 2px;
     }
-    .hero-meta {
+    .nav-badges {
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        font-size: 0.88rem;
+        gap: 8px;
+        align-items: center;
     }
-    .meta-item {
-        background: #ffffff;
-        padding: 6px 14px;
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        color: #334155;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    .nav-pill {
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+        white-space: nowrap;
     }
-    .meta-item b {
-        color: #1d4ed8;
-    }
+    .badge-primary { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+    .badge-info { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    .badge-accent { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+    .badge-author { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
 
-    /* Primary Action Button */
+    /* High-Impact Primary Action Button */
     .primary-btn {
         background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
+        font-size: 1.02rem !important;
         border: none !important;
         border-radius: 12px !important;
         box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35) !important;
@@ -652,43 +675,59 @@ def build_app():
         box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.5) !important;
     }
 
-    /* Executive Summary KPI Dashboard Cards */
+    /* Executive KPI Dashboard Cards (2x2 Fixed Grid) */
     .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-        margin-top: 10px;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
     }
     .kpi-card, .dark .kpi-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 14px !important;
-        padding: 14px 18px !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 12px !important;
+        padding: 14px 16px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07) !important;
     }
+    .card-cat { border-left: 4px solid #4f46e5 !important; }
+    .card-sent { border-left: 4px solid #0284c7 !important; }
+    .card-topic { border-left: 4px solid #0d9488 !important; }
+    .card-stats { border-left: 4px solid #64748b !important; }
+
     .kpi-title, .dark .kpi-title {
-        font-size: 0.76rem !important;
+        font-size: 0.74rem !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
         color: #64748b !important;
         font-weight: 700 !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
     }
     .kpi-value, .dark .kpi-value {
         font-size: 1.25rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
+        line-height: 1.3;
+    }
+    .kpi-sub {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-top: 4px;
+        font-weight: 500;
     }
     .category-badge, .dark .category-badge {
         display: inline-block;
-        background: #e0e7ff !important;
-        color: #3730a3 !important;
+        background: #eef2ff !important;
+        color: #4338ca !important;
         padding: 4px 12px;
         border-radius: 8px;
         font-weight: 800;
@@ -707,11 +746,66 @@ def build_app():
         font-weight: 800;
     }
 
-    /* Inputs and Tables Light Mode */
+    /* Executive Box & Entity Pills */
+    .executive-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 18px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    }
+    .box-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+    .entity-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .entity-pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 0.84rem;
+        font-weight: 600;
+    }
+    .pill-person { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .pill-location { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .pill-org { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .summary-body {
+        font-size: 0.96rem;
+        line-height: 1.6;
+        color: #334155;
+        background: #f8fafc;
+        border-left: 3px solid #3b82f6;
+        padding: 12px 16px;
+        border-radius: 6px;
+    }
+
+    /* Pipeline Guide Under Analyze Button */
+    .pipeline-guide {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* Inputs, Textareas and Tables */
     .dark input, .dark textarea, .dark select, input, textarea {
         background-color: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
     }
     .dark table, table {
         background-color: #ffffff !important;
@@ -754,20 +848,22 @@ def build_app():
 
     with gr.Blocks(title="MahaVarta - Marathi News Intelligence", theme=soft_theme, css=custom_css) as demo:
         gr.HTML(
-            """
-            <div class="hero-banner">
-                <div class="hero-badge">
-                    🎓 NLP Mini Project — MIT Academy of Engineering (MITAOE), Alandi, Pune
+            f"""
+            <style>{custom_css}</style>
+            <div class="top-nav-bar">
+                <div class="nav-brand">
+                    <div class="brand-icon">📰</div>
+                    <div class="brand-text">
+                        <div class="brand-title">MahaVarta <span class="brand-devanagari">(महावार्ता)</span></div>
+                        <div class="brand-tagline">मराठी बातमी बुद्धिमत्ता आणि बहु-मॉडेल विश्लेषण प्रणाली | MITAOE Alandi, Pune</div>
+                    </div>
                 </div>
-                <h1 class="hero-title">📰 MahaVarta (महावार्ता)</h1>
-                <p class="hero-subtitle">मराठी बातमी विश्लेषण, वर्गीकरण आणि बहु-मॉडेल सारांशीकरण प्रणाली</p>
-                <div class="hero-meta">
-                    <span class="meta-item">👨‍💻 <b>Vishal Shende</b> (202401110034) &amp; <b>Gufran Shah</b> (202401110011)</span>
-                    <span class="meta-item">⚡ <b>Linear SVM (87.74% Accuracy)</b></span>
-                    <span class="meta-item">🤖 <b>mT5 XL-Sum Abstractive</b></span>
-                    <span class="meta-item">🧠 <b>Qwen3-0.6B LLM</b></span>
-                    <span class="meta-item">🏷️ <b>MahaNER (96.51% Token Acc)</b></span>
-                    <span class="meta-item">🎯 <b>18-Topic LDA</b></span>
+                <div class="nav-badges">
+                    <span class="nav-pill badge-primary">⚡ Linear SVM <b>87.74%</b></span>
+                    <span class="nav-pill badge-info">🏷️ MahaNER <b>96.51%</b></span>
+                    <span class="nav-pill badge-accent">🤖 mT5 XL-Sum</span>
+                    <span class="nav-pill badge-purple">🧠 Qwen3-0.6B</span>
+                    <span class="nav-pill badge-author">👨‍💻 <b>Vishal Shende</b> &amp; <b>Gufran Shah</b></span>
                 </div>
             </div>
             """
@@ -776,17 +872,25 @@ def build_app():
         with gr.Row():
             # Left Input Column
             with gr.Column(scale=4):
-                gr.Markdown("### ✍️ बातमी प्रविष्ट करा (Input Article)")
+                gr.Markdown("### ✍️ नमुना बातमी निवडा (Quick Samples)")
+                with gr.Row():
+                    btn_sample_short = gr.Button("🏏 १. क्रीडा (Sports)", size="sm", variant="secondary")
+                    btn_sample_med = gr.Button("🩺 २. आरोग्य (Health)", size="sm", variant="secondary")
+                    btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm", variant="secondary")
+
                 input_textbox = gr.Textbox(
                     label="मराठी बातमीचा मजकूर पेस्ट करा (Paste Marathi News Article)",
-                    placeholder="येथे बातमीचा मजकूर पेस्ट करा...",
-                    lines=10,
+                    placeholder="येथे बातमीचा मजकूर पेस्ट करा किंवा वरील १/२/३ नमुना बातमी बटण दाबा...",
+                    lines=9,
                 )
-                file_upload = gr.File(
-                    label="किंवा .txt फाइल अपलोड करा (Or Upload .txt file - UTF-8)",
-                    file_types=[".txt"],
-                    type="filepath",
-                )
+
+                with gr.Accordion("📁 किंवा .txt फाइल अपलोड करा (Or Upload .txt file)", open=False):
+                    file_upload = gr.File(
+                        label="Upload .txt file (UTF-8)",
+                        file_types=[".txt"],
+                        type="filepath",
+                    )
+
                 summary_slider = gr.Slider(
                     minimum=1,
                     maximum=5,
@@ -795,14 +899,24 @@ def build_app():
                     label="सारांश वाक्यांची संख्या (TextRank Summary Sentence Count)",
                 )
 
-                analyze_btn = gr.Button("🔍 बातमीचे विश्लेषण करा (Analyse Article)", variant="primary", size="lg", elem_classes=["primary-btn"])
+                analyze_btn = gr.Button(
+                    "🚀 संपूर्ण बातमीचे विश्लेषण करा (Analyse Article)",
+                    variant="primary",
+                    size="lg",
+                    elem_classes=["primary-btn"],
+                )
 
-                # Sample Article Quick Load Buttons
-                gr.Markdown("#### 📂 नमुना बातम्या (Click to Quick-Load Sample)")
-                with gr.Row():
-                    btn_sample_short = gr.Button("🏏 १. क्रीडा (Sports)", size="sm")
-                    btn_sample_med = gr.Button("🩺 २. आरोग्य (Health)", size="sm")
-                    btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm")
+                gr.HTML(
+                    """
+                    <div class="pipeline-guide">
+                        <span>⚡ 12-वर्ग वर्गीकरण</span> • 
+                        <span>🏷️ नामित घटक (NER)</span> • 
+                        <span>🎭 भावना विश्लेषण</span> • 
+                        <span>📋 TextRank &amp; mT5</span> • 
+                        <span>🎯 18-विषय LDA</span>
+                    </div>
+                    """
+                )
 
             # Right Output Tabs Column
             with gr.Column(scale=6):
@@ -831,33 +945,26 @@ def build_app():
                             """
                         )
 
-                    # Tab 3: Summary (Side-by-Side: TextRank & mT5)
+                    # Tab 3: Summary (Full-Width Tabs: TextRank & mT5)
                     with gr.Tab("📋 सारांश (Summary)"):
-                        gr.Markdown("### 📑 बातमीचा सारांश: एक्स्ट्रॅक्टिव्ह (TextRank) आणि ॲब्स्ट्रॅक्टिव्ह (mT5)")
-                        with gr.Row():
-                            # Left Column: Extractive TextRank
-                            with gr.Column(scale=1):
-                                gr.Markdown("#### 🔹 १. TextRank एक्स्ट्रॅक्टिव्ह सारांश (Extractive)")
-                                gr.Markdown("*लेखातील सर्वाधिक मध्यवर्ती/महत्त्वाच्या मूळ वाक्यांची निवड:*")
+                        gr.Markdown("### 📑 बातमीचा बहु-मॉडेल सारांश (Multi-Model Summarization)")
+                        with gr.Tabs():
+                            # Sub-tab 1: Extractive TextRank
+                            with gr.Tab("🔹 १. TextRank एक्स्ट्रॅक्टिव्ह सारांश (Extractive)"):
+                                gr.Markdown("*लेखातील सर्वाधिक मध्यवर्ती/महत्त्वाच्या मूळ वाक्यांची निवड (TF-IDF + Cosine Graph + PageRank Centrality):*")
                                 summary_output = gr.Textbox(
                                     label="TextRank Summary (Extractive)",
                                     lines=8,
                                 )
-                                gr.Markdown(
-                                    """
-                                    **पद्धती तपशील:**
-                                    - मराठी वाक्य विभाजन (दंडा `।`, पूर्णविराम `.`, प्रश्न `?`)
-                                    - TF-IDF + Cosine Graph + PageRank Centrality
-                                    """
-                                )
 
-                            # Right Column: Abstractive mT5
-                            with gr.Column(scale=1):
-                                gr.Markdown("#### 🔸 २. mT5 ॲब्स्ट्रॅक्टिव्ह सारांश (Abstractive)")
-                                gr.Markdown("*`csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत सारांश:*")
+                            # Sub-tab 2: Abstractive mT5
+                            with gr.Tab("🔸 २. mT5 ॲब्स्ट्रॅक्टिव्ह सारांश (Deep Learning Abstractive)"):
+                                gr.Markdown("*`csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत तयार केलेला सारांश:*")
                                 btn_generate_mt5 = gr.Button(
                                     "✨ Generate mT5 Summary",
                                     variant="primary",
+                                    size="md",
+                                    elem_classes=["primary-btn"],
                                 )
                                 mt5_summary_output = gr.Textbox(
                                     label="mT5 Abstractive Summary (Machine-Generated, May Contain Errors)",
@@ -875,7 +982,7 @@ def build_app():
                                         mt5_len_penalty = gr.Slider(minimum=0.5, maximum=2.0, value=1.0, step=0.1, label="Length Penalty")
                                         mt5_ngram_size = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="No Repeat N-gram")
 
-                    # Tab 4: News Brief (Qwen3 Prompt-Engineered Brief)
+                    # Tab 4: News Brief (Qwen3 Prompt-Engineered Brief with Sub-tabs)
                     with gr.Tab("📰 बातम्या संक्षेप (News Brief - Qwen3)"):
                         gr.Markdown("### ⚡ Qwen3-0.6B प्रॉम्प्ट-इंजिनिअर्ड बातम्या संक्षेप (News Brief)")
                         gr.Markdown(
@@ -890,12 +997,11 @@ def build_app():
                                     info="शून्य-शॉट (Zero-shot), भूमिका-आधारित (Role-based), भूमिका + अटी (Role + Constraints), किंवा तिन्हींची तुलना",
                                 )
                             with gr.Column(scale=2):
-                                btn_generate_brief = gr.Button("✨ Generate News Brief", variant="primary", size="lg")
+                                btn_generate_brief = gr.Button("✨ Generate News Brief", variant="primary", size="lg", elem_classes=["primary-btn"])
 
-                        with gr.Row():
-                            # Column 1: Zero-shot
-                            with gr.Column(scale=1):
-                                gr.Markdown("#### १. शून्य-शॉट (Zero-shot)")
+                        with gr.Tabs():
+                            # Sub-tab 1: Zero-shot
+                            with gr.Tab("१. शून्य-शॉट (Zero-shot)"):
                                 brief_out_zs = gr.Textbox(
                                     label="Zero-shot Output",
                                     lines=7,
@@ -903,9 +1009,8 @@ def build_app():
                                 )
                                 brief_badge_zs = gr.Markdown("")
 
-                            # Column 2: Role-based
-                            with gr.Column(scale=1):
-                                gr.Markdown("#### २. भूमिका-आधारित (Role-based)")
+                            # Sub-tab 2: Role-based
+                            with gr.Tab("२. भूमिका-आधारित (Role-based)"):
                                 brief_out_rb = gr.Textbox(
                                     label="Role-based Output",
                                     lines=7,
@@ -913,9 +1018,8 @@ def build_app():
                                 )
                                 brief_badge_rb = gr.Markdown("")
 
-                            # Column 3: Role + Constraints
-                            with gr.Column(scale=1):
-                                gr.Markdown("#### ३. भूमिका + अटी (Role + Constraints)")
+                            # Sub-tab 3: Role + Constraints
+                            with gr.Tab("३. भूमिका + अटी (Role + Constraints)"):
                                 brief_out_rc = gr.Textbox(
                                     label="Role + Constraints Output",
                                     lines=7,
