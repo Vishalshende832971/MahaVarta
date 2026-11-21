@@ -400,35 +400,35 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
         overview_md = f"""
 <div class="kpi-grid">
     <div class="kpi-card card-cat">
-        <div class="kpi-title">🏷️ अनुमानित मुख्य वर्ग (Predicted Category)</div>
+        <div class="kpi-title">🏷️ Predicted Category <span class="sub-lang">(अनुमानित मुख्य वर्ग)</span></div>
         <div class="kpi-value"><span class="category-badge">{top_category_name}</span></div>
-        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">Linear SVM (C=0.5, 87.74% Acc)</div>
+        <div class="kpi-sub">Linear SVM (C=0.5, 87.74% Test Acc)</div>
     </div>
     <div class="kpi-card card-sent">
-        <div class="kpi-title">🎭 अनुमानित भावना (Predicted Sentiment)</div>
+        <div class="kpi-title">🎭 Predicted Sentiment <span class="sub-lang">(अनुमानित भावना)</span></div>
         <div class="kpi-value"><span class="{sent_color_cls}">● {sent_brief}</span></div>
-        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">मॉडेल भाकीत गुण: <b>{sent_brief_score}</b></div>
+        <div class="kpi-sub">Score (भाकीत गुण): <b>{sent_brief_score}</b></div>
     </div>
     <div class="kpi-card card-topic">
-        <div class="kpi-title">🎯 प्रमुख शोधलेला विषय (Dominant Topic)</div>
-        <div class="kpi-value" style="font-size:1.05rem; color:#047857; font-weight:800;">{top_topic_str}</div>
-        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">18-Topic Unsupervised LDA Model</div>
+        <div class="kpi-title">🎯 Dominant Topic <span class="sub-lang">(शोधलेला मुख्य विषय)</span></div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#0891b2; font-weight:800;">{top_topic_str}</div>
+        <div class="kpi-sub">18-Topic Unsupervised LDA Model</div>
     </div>
     <div class="kpi-card card-stats">
-        <div class="kpi-title">📊 बातमी सांख्यिकी (Article Stats)</div>
-        <div class="kpi-value" style="font-size:1.05rem; color:#0f172a; font-weight:800;"><b>{len(words)}</b> शब्द | <b>{len(sents)}</b> वाक्ये</div>
-        <div class="kpi-sub" style="color:#1e293b; font-weight:700;">एकूण अक्षरे: {len(article_text)} | UTF-8 Devanagari</div>
+        <div class="kpi-title">📊 Article Stats <span class="sub-lang">(बातमी सांख्यिकी)</span></div>
+        <div class="kpi-value" style="font-size:1.05rem; color:#0f172a; font-weight:800;"><b>{len(words)}</b> Words (शब्द) | <b>{len(sents)}</b> Sentences (वाक्ये)</div>
+        <div class="kpi-sub">Characters (अक्षरे): {len(article_text)} | UTF-8 Devanagari</div>
     </div>
 </div>
 
 <div class="executive-box">
-    <div class="box-title" style="color:#0f172a; font-weight:800;">👥 शोधलेले प्रमुख घटक (Key Extracted Entities)</div>
+    <div class="box-title">👥 Key Extracted Entities <span class="sub-lang">(शोधलेले प्रमुख घटक - NER)</span></div>
     <div class="entity-container">{entity_pills_disp}</div>
 </div>
 
 <div class="executive-box" style="margin-top: 14px;">
-    <div class="box-title" style="color:#0f172a; font-weight:800;">📝 संक्षिप्त मजकूर सारांश (TextRank Extractive Summary)</div>
-    <div class="summary-body" style="color:#0f172a; font-weight:600;">{summary_text}</div>
+    <div class="box-title">📝 Extractive Summary <span class="sub-lang">(संक्षिप्त मजकूर सारांश - TextRank)</span></div>
+    <div class="summary-body">{summary_text}</div>
 </div>
 """
     except Exception as e:
@@ -583,6 +583,55 @@ def load_rouge_tables():
 def build_app():
     custom_css = """
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Yantramanav:wght@400;500;600;700;900&display=swap');
+
+        /* Language Switcher Control */
+    .lang-switcher-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .lang-switch-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .lang-switcher {
+        display: inline-flex;
+        background: #f1f5f9;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 9999px;
+        padding: 3px;
+        gap: 3px;
+    }
+    .lang-btn {
+        background: transparent;
+        border: none;
+        border-radius: 9999px;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .lang-btn:hover {
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.8);
+    }
+    .lang-btn.active {
+        background: #ffffff !important;
+        color: #4338ca !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        font-weight: 900 !important;
+        border: 1px solid rgba(199, 210, 254, 0.8);
+    }
+    .sub-lang {
+        opacity: 0.78;
+        font-weight: 600;
+        font-size: 0.88em;
+    }
 
     /* Global Typography & Light Modern Studio Aesthetic */
     * {
@@ -1181,7 +1230,7 @@ def build_app():
                             MahaVarta <span class="brand-devanagari">(महावार्ता)</span>
                             <span class="studio-tag">AI STUDIO</span>
                         </div>
-                        <div class="brand-tagline">मराठी बातमी बुद्धिमत्ता आणि बहु-मॉडेल विश्लेषण प्रणाली • NLP Engineering Project • MITAOE Alandi</div>
+                        <div class="brand-tagline">Marathi News Intelligence &amp; Multi-Model NLP System (मराठी बातमी बुद्धिमत्ता प्रणाली) • MITAOE Alandi</div>
                     </div>
                 </div>
                 <div class="nav-badges">
@@ -1205,8 +1254,8 @@ def build_app():
                     btn_sample_long = gr.Button("🏛️ ३. राजकारण (Politics)", size="sm", elem_classes=["sample-btn"])
 
                 input_textbox = gr.Textbox(
-                    label="मराठी बातमीचा मजकूर पेस्ट करा (Paste Marathi News Article)",
-                    placeholder="येथे बातमीचा मजकूर पेस्ट करा किंवा वरील १/२/३ नमुना बातमी बटण दाबा...",
+                    label="मराठी बातमीचा मजकूर प्रविष्ट करा (Input Marathi News Article)",
+                    placeholder="येथे बातमीचा मजकूर पेस्ट करा किंवा वरील १/२/३ नमुना बातमी बटण दाबा... (Paste Marathi news text or click quick sample 1/2/3 above...)",
                     lines=9,
                 )
 
@@ -1222,11 +1271,11 @@ def build_app():
                     maximum=5,
                     value=3,
                     step=1,
-                    label="सारांश वाक्यांची संख्या (TextRank Summary Sentence Count)",
+                    label="सारांश वाक्यांची संख्या (TextRank Summary Sentence Count: 1-5)",
                 )
 
                 analyze_btn = gr.Button(
-                    "🚀 संपूर्ण बातमीचे विश्लेषण करा (Analyse Article)",
+                    "🚀 संपूर्ण बातमीचे विश्लेषण करा (Analyze Article)",
                     variant="primary",
                     size="lg",
                     elem_classes=["primary-btn"],
@@ -1235,11 +1284,11 @@ def build_app():
                 gr.HTML(
                     """
                     <div class="pipeline-guide">
-                        <span>⚡ 12-वर्ग वर्गीकरण</span> • 
-                        <span>🏷️ नामित घटक (NER)</span> • 
-                        <span>🎭 भावना विश्लेषण</span> • 
-                        <span>📋 TextRank &amp; mT5</span> • 
-                        <span>🎯 18-विषय LDA</span>
+                        <span>⚡ 12-Class Classification (वर्गवारी)</span> • 
+                        <span>🏷️ MahaNER (घटक)</span> • 
+                        <span>🎭 Sentiment (भावना)</span> • 
+                        <span>📋 TextRank &amp; mT5 (सारांश)</span> • 
+                        <span>🎯 18-Topic LDA (विषय)</span>
                     </div>
                     """
                 )
@@ -1248,11 +1297,11 @@ def build_app():
             with gr.Column(scale=6):
                 with gr.Tabs():
                     # Tab 1: Overview
-                    with gr.Tab("📌 आढावा"):
+                    with gr.Tab("📌 Overview (आढावा)"):
                         overview_output = gr.Markdown("बातमीचे विश्लेषण करण्यासाठी डावीकडील **Analyse Article** बटण दाबा.")
 
                     # Tab 2: Classification
-                    with gr.Tab("🏷️ वर्गवारी"):
+                    with gr.Tab("🏷️ Classification (वर्गवारी)"):
                         gr.Markdown("### 🏆 सर्वोच्च ३ संभाव्य वर्ग आणि वर्गवारी गुण (Top-3 Categories & Scores)")
                         gr.Markdown(
                             "*टीप: हे गुण Linear SVM निर्णय फलन (decision function) वर आधारित मॉडेल वर्गवारी गुण आहेत (हे संभाव्यता किंवा कॉन्फिडन्स नाहीत).*"
@@ -1272,7 +1321,7 @@ def build_app():
                         )
 
                     # Tab 3: Summary (Full-Width Tabs: TextRank & mT5)
-                    with gr.Tab("📋 सारांश"):
+                    with gr.Tab("📋 Summary (सारांश)"):
                         gr.Markdown("### 📑 बातमीचा बहु-मॉडेल सारांश (Multi-Model Summarization)")
                         with gr.Tabs():
                             # Sub-tab 1: Extractive TextRank
@@ -1309,7 +1358,7 @@ def build_app():
                                         mt5_ngram_size = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="No Repeat N-gram")
 
                     # Tab 4: News Brief (Qwen3 Prompt-Engineered Brief with Sub-tabs)
-                    with gr.Tab("📰 संक्षेप"):
+                    with gr.Tab("📰 News Brief (संक्षेप)"):
                         gr.Markdown("### ⚡ Qwen3-0.6B प्रॉम्प्ट-इंजिनिअर्ड बातम्या संक्षेप (News Brief)")
                         gr.Markdown(
                             "*लहान भाषा मॉडेल (`Qwen/Qwen3-0.6B`) वापरून बातमीचे शीर्षक आणि ३ महत्त्वाचे मुद्दे संक्षेप रूपात तयार करा:*"
@@ -1364,7 +1413,7 @@ def build_app():
                         )
 
                     # Tab 5: Sentiment
-                    with gr.Tab("🎭 भावना"):
+                    with gr.Tab("🎭 Sentiment (भावना)"):
                         sentiment_label_out = gr.Markdown("भावना विश्लेषणासाठी लेख प्रविष्ट करा.")
                         gr.Markdown("#### सर्व भावनांचे मॉडेल भाकीत गुण (Model Prediction Scores by Class):")
                         sentiment_scores_out = gr.Dataframe(
@@ -1382,7 +1431,7 @@ def build_app():
                         )
 
                     # Tab 5: Named Entity Recognition
-                    with gr.Tab("👥 घटक (NER)"):
+                    with gr.Tab("👥 Entities NER (घटक)"):
                         gr.Markdown("### 🔍 लेखातील नामित घटक (Extracted Named Entities in Context)")
                         gr.Markdown("*मजकुरात ओळखलेले घटक वेगवेगळ्या रंगांमध्ये हायलाइट केलेले आहेत:*")
                         ner_highlight_out = gr.HighlightedText(
@@ -1402,7 +1451,7 @@ def build_app():
                         )
 
                     # Tab 6: Topic Modelling (LDA)
-                    with gr.Tab("🎯 विषय (LDA)"):
+                    with gr.Tab("🎯 LDA Topics (विषय)"):
                         gr.Markdown("### 🔍 बातमीचे प्रमुख विषय (Discovered Topics & Topic Weights)")
                         gr.Markdown(
                             "*टीप: हे गुण LDA (Latent Dirichlet Allocation) मॉडेलनुसार लेखातील संभाव्यता विषय भार (Topic Weight) दर्शवतात.*"
@@ -1422,7 +1471,7 @@ def build_app():
                         )
 
                     # Tab 7: Preprocessing (CO1 Demonstration)
-                    with gr.Tab("⚙️ पूर्वप्रक्रिया"):
+                    with gr.Tab("⚙️ Preprocess (पूर्वप्रक्रिया)"):
                         gr.Markdown("### 🔬 CO1 प्रात्यक्षिक: युनिकोड नॉर्मलायझेशन, क्लीनिंग, टोकनायझेशन आणि TF-IDF")
                         with gr.Accordion("१. मूळ मजकूर (Original Input Text)", open=False):
                             orig_text_out = gr.Textbox(label="Original Text (Untouched for Transformers)", lines=4)
@@ -1439,7 +1488,7 @@ def build_app():
                             )
 
                     # Tab 8: Evaluation (ROUGE results)
-                    with gr.Tab("📊 मूल्यमापन"):
+                    with gr.Tab("📊 Evaluation (मूल्यमापन)"):
                         gr.Markdown(
                             "### ROUGE evaluation of summarisation methods\n"
                             "Scores are F-measures against human-written Marathi reference "
