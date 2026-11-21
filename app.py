@@ -588,13 +588,84 @@ def build_app():
     * {
         font-family: 'Plus Jakarta Sans', 'Yantramanav', system-ui, -apple-system, sans-serif !important;
     }
-    :root, body, .gradio-container, .dark, body.dark {
+    /* Force Dark, Crisp High-Contrast Text Everywhere */
+    :root, .gradio-container, .dark, body.dark {
+        --body-text-color: #0f172a !important;
+        --body-text-color-subdued: #1e293b !important;
+        --block-label-text-color: #0f172a !important;
+        --block-title-text-color: #0f172a !important;
+        --input-text-color: #0f172a !important;
+        --input-placeholder-color: #475569 !important;
+        --table-text-color: #0f172a !important;
+        --checkbox-label-text-color: #0f172a !important;
         background-color: #f8fafc !important;
         color: #0f172a !important;
     }
     .dark .gradio-container, .dark .block, .dark .panel {
         background-color: #f8fafc !important;
         color: #0f172a !important;
+    }
+
+    /* All Text, Paragraphs, Headings and Markdown */
+    p, span, div, li, strong, b, h1, h2, h3, h4, h5, h6, .prose, .prose * {
+        color: #0f172a !important;
+    }
+    em, i, .prose em, .prose i {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+    small, .caption, .info, .subtext {
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+
+    /* Form Labels, Accordions & Block Titles */
+    label, label span, .block-title, .block-label, .wrap label, .form label {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+    }
+    details, details summary, .label-accordion, .accordion-title {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Dropdowns, Selects, and Choices */
+    select, option, .dropdown, div[data-testid="dropdown"], .secondary-wrap, span.single-select, .wrap-inner, .options, .item, .dropdown-choice, .dropdown-arrow, input[role="combobox"] {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        background-color: #ffffff !important;
+    }
+    .dropdown input, .dropdown span, .dropdown div {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    /* Radio Buttons & Labels */
+    .radio-group, .radio-group *, .radio-group label, .radio-group span, input[type="radio"] + span, label.selected {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    /* Inputs, Textareas, Numbers & Placeholders */
+    input, textarea, input[type="text"], input[type="number"], .input-wrap {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        background-color: #ffffff !important;
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 10px !important;
+    }
+    ::placeholder, input::placeholder, textarea::placeholder {
+        color: #475569 !important;
+        opacity: 1 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Sliders and Range Indicators */
+    input[type="range"], .range-slider, .slider-value, .range-slider-value {
+        color: #0f172a !important;
+        font-weight: 800 !important;
     }
 
     /* Executive Top Navigation Header */
