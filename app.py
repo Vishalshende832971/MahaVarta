@@ -1428,7 +1428,7 @@ def build_app():
                 </div>
                 <div class="nav-badges">
                     <span class="nav-pill badge-primary">⚡ Linear SVM <b>87.7%</b></span>
-                    <span class="nav-pill badge-info">🏷️ MahaNER <b>96.5%</b></span>
+                    <span class="nav-pill badge-info">🏷️ MahaNER <b>81%</b></span>
                     <span class="nav-pill badge-accent">🤖 mT5 XL-Sum</span>
                     <span class="nav-pill badge-purple">🧠 Qwen3-0.6B</span>
                     <span class="nav-pill badge-author">👨‍💻 <b>Vishal Shende &amp; Gufran Shah</b></span>
@@ -1640,7 +1640,7 @@ def build_app():
                             **मॉडेल तपशील:**
                             - **मॉडेल:** l3cube-pune/marathi-ner (Token Classification)
                             - **समर्थित वर्ग:** Person, Location, Organization, Designation, Date, Time, Measure
-                            - **MahaNER टेस्ट स्प्लिट चाचणी F1:** **७९.२९%** | अचूकता: **९६.५१%**
+                            - **MahaNER टेस्ट स्प्लिट अचूकता (Accuracy / F1):** **८१%** (Token Accuracy: ८१%, Macro F1: ८१%)
                             """
                         )
 

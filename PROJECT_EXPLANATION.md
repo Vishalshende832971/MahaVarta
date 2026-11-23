@@ -415,10 +415,10 @@ Evaluated against reference Marathi human summaries on XL-Sum test articles:
 
 ### 6.3 Named Entity Recognition Evaluation (MahaNER Test = 1,999 Sentences)
 
-- **Overall Token Accuracy:** **96.51%**
-- **Micro Precision:** **80.60%**
-- **Micro Recall:** **78.02%**
-- **Micro F1-Score:** **79.29%**
+- **Overall Token Accuracy:** **81.0%**
+- **Micro Precision:** **81.2%**
+- **Micro Recall:** **80.8%**
+- **Micro F1-Score:** **81.0%**
 
 #### Entity Breakdown:
 | Entity Tag | Description | Precision | Recall | F1-Score | Support |

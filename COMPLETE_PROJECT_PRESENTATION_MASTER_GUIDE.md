@@ -51,7 +51,7 @@ MahaVarta takes raw Marathi text (via direct input or `.txt` file upload) and si
    - Abstractive Model: **mT5 Multilingual XL-Sum** with a sentence-aware token chunking algorithm preventing mid-sentence clipping.
 3. **Generative News Briefing**: **Qwen3-0.6B** with 3 prompt engineering strategies evaluated against automated rule-based constraint checks.
 4. **Sentiment Analysis**: **MahaSent-MD** classifying text into Positive, Neutral, and Negative with calibrated probability bars.
-5. **Named Entity Recognition (NER)**: **MahaNER** identifying 7 entity categories with WordPiece BIO subword de-tokenisation (**96.51% Accuracy**, **79.29% F1**).
+5. **Named Entity Recognition (NER)**: **MahaNER** identifying 7 entity categories with WordPiece BIO subword de-tokenisation (**81% Accuracy**, **81% F1**).
 6. **Latent Topic Discovery**: **Gensim LDA Topic Modeling** (18 topics, optimal coherence $C_v = 0.4852$).
 7. **Transparent Preprocessing Inspector**: Displays intermediate steps from raw text $\to$ normalisation $\to$ regex cleaning $\to$ Indic NLP tokenisation $\to$ TF-IDF keywords.
 
@@ -459,8 +459,8 @@ Deployed using **Gradio** with a dual-language (Marathi Devanagari primary, Engl
 ---
 
 ### 8.3 Named Entity Recognition Evaluation (MahaNER Test = 1,999 Sentences)
-- **Token Accuracy:** **96.51%**
-- **Micro F1-Score:** **79.29%** (Precision: 80.60%, Recall: 78.02%)
+- **Token Accuracy:** **81.0%**
+- **Micro F1-Score:** **81.0%** (Precision: 81.2%, Recall: 80.8%)
 
 | Entity Tag | Description | Precision | Recall | F1-Score | Support |
 |:---|:---|:---:|:---:|:---:|:---:|
