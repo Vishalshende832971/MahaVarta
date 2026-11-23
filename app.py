@@ -280,8 +280,8 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
         marathi_label = marathi_sent_map.get(pred_label, pred_label)
 
         sentiment_label_md = f"""
-### 🎭 मुख्य भावना: **`{marathi_label}`**
-- **मॉडेल भाकीत गुण (Model Prediction Score):** **`{pred_score:.4f}`**
+### 🎭 मुख्य भावना: **{marathi_label}**
+- **मॉडेल भाकीत गुण (Model Prediction Score):** **{pred_score:.4f}**
 *(टीप: हा स्कोअर मॉडेलचे भाकीत गुण दर्शवतो, ही संभाव्यता किंवा 'confidence' नाही.)*
 """
         sent_rows = []
@@ -495,13 +495,13 @@ def handle_mt5_summary(
 
         status_info = f"""
 **📊 mT5 सारांश मेट्रिक्स (Summary Metrics):**
-- **इनपुट टोकन्स (Input Tokens):** `{tokens}`
-- **लागलेला वेळ (Time Taken):** `{seconds} सेकंद`
-- **पद्धती (Mode):** `{mode.capitalize()}` ({num_chunks} chunk(s))
+- **इनपुट टोकन्स (Input Tokens):** **{tokens}**
+- **लागलेला वेळ (Time Taken):** **{seconds} सेकंद**
+- **पद्धती (Mode):** **{mode.capitalize()}** ({num_chunks} chunk(s))
 {warning_note}
 
 ---
-*📢 **महत्त्वाची नोंद:** हा सारांश `csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे मशीन-निर्मित (machine-generated, may contain errors) आहे; यात भाषिक अथवा वस्तुस्थितीजन्य त्रुटी असण्याची शक्यता असू शकते.*
+*📢 **महत्त्वाची नोंद:** हा सारांश csebuetnlp/mT5_multilingual_XLSum डीप लर्निंग मॉडेलद्वारे मशीन-निर्मित (machine-generated, may contain errors) आहे; यात भाषिक अथवा वस्तुस्थितीजन्य त्रुटी असण्याची शक्यता असू शकते.*
 """
         return summary, status_info
     except Exception as e:
@@ -533,8 +533,8 @@ def handle_news_brief(text: str, prompt_variant: str):
             words = len(output_txt.split())
             badge = f"""**📊 उद्दिष्ट तपासणी (Objective Checks):**
 - **३ क्रमांकित मुद्दे (3 items):** {has_three}
-- **देवनागरी प्रमाण (Devanagari):** `{dev:.1f}%`
-- **शब्द संख्या (Words):** `{words}` | **वेळ:** `{sec}s`"""
+- **देवनागरी प्रमाण (Devanagari):** **{dev:.1f}%**
+- **शब्द संख्या (Words):** **{words}** | **वेळ:** **{sec}s**"""
             return output_txt, badge
 
         if prompt_variant == "Compare all three":
@@ -700,48 +700,58 @@ def build_app():
     }
 
     /* Radio Groups & Options (Ensures Highly Visible Selection) */
+    #brief-prompt-variant,
     .gradio-container div[role="radiogroup"],
     .gradio-container [data-testid="radio-group"],
     .gradio-container .gr-radio,
+    .gradio-container fieldset,
     .gradio-container .wrap:has(input[type="radio"]) {
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 8px !important;
-        padding: 4px 0 !important;
+        gap: 10px !important;
+        padding: 6px 0 !important;
     }
 
     /* Base Radio Option Chip */
+    #brief-prompt-variant label,
     .gradio-container div[role="radiogroup"] label,
     .gradio-container [data-testid="radio-group"] label,
     .gradio-container .gr-radio label,
+    .gradio-container fieldset label,
     .gradio-container label:has(input[type="radio"]) {
         display: inline-flex !important;
         align-items: center !important;
         gap: 8px !important;
-        padding: 8px 16px !important;
-        border-radius: 10px !important;
-        border: 1.5px solid #cbd5e1 !important;
+        padding: 8px 18px !important;
+        margin: 2px !important;
+        border-radius: 12px !important;
+        border: 2px solid #cbd5e1 !important;
         background: #ffffff !important;
         background-color: #ffffff !important;
-        color: #334155 !important;
+        color: #1e293b !important;
         font-weight: 700 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.92rem !important;
         cursor: pointer !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
     }
 
     /* Hover state */
+    #brief-prompt-variant label:hover,
     .gradio-container label:has(input[type="radio"]):hover,
     .gradio-container div[role="radiogroup"] label:hover {
         background: #f8fafc !important;
         border-color: #818cf8 !important;
         color: #0f172a !important;
+        transform: translateY(-1px) !important;
     }
 
     /* SELECTED Radio Option (Clear Visible Indigo Card) */
+    #brief-prompt-variant label:has(input:checked),
+    #brief-prompt-variant label.selected,
     .gradio-container label:has(input[type="radio"]:checked),
-    .gradio-container label.selected:has(input[type="radio"]),
+    .gradio-container label.selected,
+    .gradio-container label[data-checked="true"],
     .gradio-container div[role="radiogroup"] label.selected,
     .gradio-container div[role="radiogroup"] label[aria-checked="true"],
     .gradio-container [data-testid="radio-group"] label.selected {
@@ -750,40 +760,20 @@ def build_app():
         border: 2px solid #4f46e5 !important;
         color: #312e81 !important;
         font-weight: 800 !important;
-        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
     }
 
-    /* Visible Radio Circle */
+    /* Native Crisp Radio Dot */
+    #brief-prompt-variant input[type="radio"],
     .gradio-container input[type="radio"] {
-        appearance: none !important;
-        -webkit-appearance: none !important;
+        accent-color: #4f46e5 !important;
         width: 18px !important;
         height: 18px !important;
         min-width: 18px !important;
         min-height: 18px !important;
-        border: 2px solid #94a3b8 !important;
-        border-radius: 50% !important;
-        background-color: #ffffff !important;
-        outline: none !important;
-        display: inline-grid !important;
-        place-content: center !important;
         margin: 0 !important;
         cursor: pointer !important;
-        transition: all 0.15s ease !important;
-    }
-
-    .gradio-container input[type="radio"]:checked {
-        border-color: #4f46e5 !important;
-        background-color: #ffffff !important;
-    }
-
-    .gradio-container input[type="radio"]:checked::before {
-        content: "" !important;
-        width: 9px !important;
-        height: 9px !important;
-        border-radius: 50% !important;
-        background-color: #4f46e5 !important;
-        box-shadow: 0 0 4px rgba(79, 70, 229, 0.6) !important;
+        display: inline-block !important;
     }
 
     .gradio-container input[type="radio"] + span,
@@ -794,15 +784,15 @@ def build_app():
         padding: 0 !important;
     }
 
-    /* All Markdown Code Blocks & Inline Code */
-    code, pre, pre code, kbd, .prose code, .markdown code, code *, .code-block, pre * {
-        background-color: #eef2ff !important;
-        background: #eef2ff !important;
-        color: #3730a3 !important;
-        border: 1px solid #c7d2fe !important;
+    /* All Markdown Code Blocks & Inline Code (Light, High-Contrast Slate) */
+    code, pre, pre code, kbd, .prose code, .markdown code, code *, .code-block, pre *, span code {
+        background-color: #f1f5f9 !important;
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border: 1px solid #cbd5e1 !important;
         padding: 2px 7px !important;
         border-radius: 6px !important;
-        font-weight: 800 !important;
+        font-weight: 700 !important;
         font-size: 0.88em !important;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
         display: inline-block !important;
@@ -945,29 +935,40 @@ def build_app():
         border: 1px solid rgba(199, 210, 254, 0.6) !important;
     }
 
-    /* Tab Overflow Menu Popup (...) */
+    /* Tab Overflow Menu Popup (...) & All Dropdown Menus */
     .tab-nav-menu,
     button.tab-nav-menu,
     .tab-nav-menu-wrapper,
     .tab-nav-menu-list,
     .tab-nav-dropdown,
-    [data-testid*="overflow"],
-    [data-testid*="tab-menu"],
-    [data-testid*="dropdown-options"],
+    .tabs-overflow,
+    .tab-overflow,
+    .tab-nav > div,
+    .tab-nav > ul,
+    nav[role="tablist"] + div,
+    nav[role="tablist"] ~ div,
+    nav[role="tablist"] ul,
     .tabs div[role="menu"],
     .tabs ul[role="menu"],
     div[role="menu"],
     ul[role="menu"],
+    div[role="listbox"],
+    ul[role="listbox"],
     .dropdown-content,
+    .dropdown-options,
+    .options,
+    [data-testid*="overflow"],
+    [data-testid*="tab-menu"],
+    [data-testid*="dropdown"],
     div[style*="position: absolute"] > ul,
     div[style*="position: absolute"] > div {
         background-color: #ffffff !important;
         background: #ffffff !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12) !important;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14) !important;
         color: #0f172a !important;
-        z-index: 9999 !important;
+        z-index: 99999 !important;
         padding: 6px !important;
     }
     .tab-nav-menu *,
@@ -975,20 +976,51 @@ def build_app():
     .tab-nav-menu-wrapper *,
     .tab-nav-menu-list *,
     .tab-nav-dropdown *,
+    .tabs-overflow *,
     div[role="menu"] *,
     ul[role="menu"] *,
-    .dropdown-content * {
-        background-color: #ffffff !important;
+    div[role="listbox"] *,
+    .dropdown-content *,
+    .dropdown-options * {
         color: #0f172a !important;
         font-weight: 700 !important;
+    }
+    div[role="menu"] button,
+    div[role="menu"] li,
+    ul[role="menu"] button,
+    ul[role="menu"] li,
+    div[role="listbox"] button,
+    div[role="listbox"] li,
+    .tab-nav-menu button,
+    .tab-nav-menu li,
+    .tab-nav-dropdown button,
+    .tab-nav-dropdown li {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
+        padding: 8px 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        text-align: left !important;
+        cursor: pointer !important;
+        border: none !important;
+        transition: all 0.15s ease !important;
     }
     div[role="menu"] button:hover,
     div[role="menu"] li:hover,
     ul[role="menu"] button:hover,
-    ul[role="menu"] li:hover {
-        background-color: #e0e7ff !important;
-        color: #3730a3 !important;
-        border-radius: 8px !important;
+    ul[role="menu"] li:hover,
+    div[role="listbox"] button:hover,
+    div[role="listbox"] li:hover,
+    .tab-nav-menu button:hover,
+    .tab-nav-menu li:hover,
+    .tab-nav-dropdown button:hover,
+    .tab-nav-dropdown li:hover {
+        background-color: #eef2ff !important;
+        background: #eef2ff !important;
+        color: #4338ca !important;
     }
 
     /* Quick Sample Pill Chips */
@@ -1305,10 +1337,24 @@ def build_app():
             document.querySelectorAll('.gradio-container, .dark').forEach(function(el) {
                 el.classList.remove('dark');
             });
+            document.querySelectorAll('#brief-prompt-variant label, div[role="radiogroup"] label, [data-testid="radio-group"] label').forEach(function(lbl) {
+                var inp = lbl.querySelector('input[type="radio"]');
+                if (inp && inp.checked) {
+                    lbl.style.setProperty('background-color', '#eef2ff', 'important');
+                    lbl.style.setProperty('border-color', '#4f46e5', 'important');
+                    lbl.style.setProperty('border-width', '2px', 'important');
+                    lbl.style.setProperty('color', '#312e81', 'important');
+                } else if (inp) {
+                    lbl.style.removeProperty('background-color');
+                    lbl.style.removeProperty('border-color');
+                    lbl.style.removeProperty('border-width');
+                    lbl.style.removeProperty('color');
+                }
+            });
         }
         document.addEventListener('DOMContentLoaded', forceLightMode);
         window.addEventListener('load', forceLightMode);
-        setInterval(forceLightMode, 300);
+        setInterval(forceLightMode, 250);
     </script>
     """
 
@@ -1408,7 +1454,7 @@ def build_app():
                             """
                             ---
                             **मॉडेल तपशील:**
-                            - **मॉडेल:** TF-IDF + Linear Support Vector Machine (`LinearSVC`, $C=0.5$, unigram)
+                            - **मॉडेल:** TF-IDF + Linear Support Vector Machine (LinearSVC, C=0.5, unigram)
                             - **प्रशिक्षण डेटा:** L3Cube-MahaNews अधिकृत डेटासेट (४२,८७० लेख, १२ वर्ग)
                             - **चाचणी अचूकता (Test Accuracy):** **८७.७४%** | **Macro-F1:** **८५.७०%**
                             """
@@ -1428,7 +1474,7 @@ def build_app():
 
                             # Sub-tab 2: Abstractive mT5
                             with gr.Tab("🔸 mT5 (Abstractive)"):
-                                gr.Markdown("*`csebuetnlp/mT5_multilingual_XLSum` डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत तयार केलेला सारांश:*")
+                                gr.Markdown("*csebuetnlp/mT5_multilingual_XLSum डीप लर्निंग मॉडेलद्वारे स्वतःच्या शब्दांत तयार केलेला सारांश:*")
                                 btn_generate_mt5 = gr.Button(
                                     "✨ Generate mT5 Summary",
                                     variant="primary",
@@ -1455,7 +1501,7 @@ def build_app():
                     with gr.Tab("📰 News Brief (संक्षेप)"):
                         gr.Markdown("### ⚡ Qwen3-0.6B प्रॉम्प्ट-इंजिनिअर्ड बातम्या संक्षेप (News Brief)")
                         gr.Markdown(
-                            "*लहान भाषा मॉडेल (`Qwen/Qwen3-0.6B`) वापरून बातमीचे शीर्षक आणि ३ महत्त्वाचे मुद्दे संक्षेप रूपात तयार करा:*"
+                            "*लहान भाषा मॉडेल (Qwen/Qwen3-0.6B) वापरून बातमीचे शीर्षक आणि ३ महत्त्वाचे मुद्दे संक्षेप रूपात तयार करा:*"
                         )
                         with gr.Row():
                             with gr.Column(scale=3):
@@ -1464,6 +1510,7 @@ def build_app():
                                     value="role_constraints",
                                     label="प्रॉम्प्ट पर्याय (Prompt Variant)",
                                     info="शून्य-शॉट (Zero-shot), भूमिका-आधारित (Role-based), भूमिका + अटी (Role + Constraints), किंवा तिन्हींची तुलना",
+                                    elem_id="brief-prompt-variant",
                                 )
                             with gr.Column(scale=2):
                                 btn_generate_brief = gr.Button("✨ Generate News Brief", variant="primary", size="lg", elem_classes=["primary-btn"])
@@ -1501,7 +1548,7 @@ def build_app():
                             <div class="warning-box">
                                 ⚠️ <b>महत्त्वाची नोंद (Caveat Note):</b><br>
                                 <i>Generated by a small 0.6B model. Marathi quality is limited and it may add information that is not in the article. Machine-generated, please verify.</i><br>
-                                (हे ०.६ अब्ज पॅरामीटर्सच्या लहान मॉडेलद्वारे (<code>Qwen/Qwen3-0.6B</code>) तयार केले आहे. मराठी भाषेची व्याकरण व वाक्यरचना गुणवत्ता मर्यादित असू शकते आणि मॉडेल लेखात नसलेली माहिती स्वतःहून जोडू शकते (hallucination). हे मशीन-निर्मित असून कृपया पडताळणी करावी.)
+                                (हे ०.६ अब्ज पॅरामीटर्सच्या लहान मॉडेलद्वारे (Qwen/Qwen3-0.6B) तयार केले आहे. मराठी भाषेची व्याकरण व वाक्यरचना गुणवत्ता मर्यादित असू शकते आणि मॉडेल लेखात नसलेली माहिती स्वतःहून जोडू शकते (hallucination). हे मशीन-निर्मित असून कृपया पडताळणी करावी.)
                             </div>
                             """
                         )
@@ -1519,7 +1566,7 @@ def build_app():
                             <div class="warning-box">
                                 ⚠️ <b>महत्त्वाची नोंद (Caveat Note):</b><br>
                                 <i>This model was trained on reviews and tweets, not news. Treat results on news as indicative.</i><br>
-                                (हे मॉडेल (<code>l3cube-pune/marathi-sentiment-md</code>) सोशल मीडिया ट्विट्स आणि पुनरावलोकनांवर (reviews) प्रशिक्षित केलेले आहे, बातम्यांवर नाही. त्यामुळे बातम्यांवरील भावनांचे निकाल केवळ सूचक म्हणून विचारात घ्यावेत.)
+                                (हे मॉडेल (l3cube-pune/marathi-sentiment-md) सोशल मीडिया ट्विट्स आणि पुनरावलोकनांवर (reviews) प्रशिक्षित केलेले आहे, बातम्यांवर नाही. त्यामुळे बातम्यांवरील भावनांचे निकाल केवळ सूचक म्हणून विचारात घ्यावेत.)
                             </div>
                             """
                         )
@@ -1538,7 +1585,7 @@ def build_app():
                             """
                             ---
                             **मॉडेल तपशील:**
-                            - **मॉडेल:** `l3cube-pune/marathi-ner` (Token Classification)
+                            - **मॉडेल:** l3cube-pune/marathi-ner (Token Classification)
                             - **समर्थित वर्ग:** Person, Location, Organization, Designation, Date, Time, Measure
                             - **MahaNER टेस्ट स्प्लिट चाचणी F1:** **७९.२९%** | अचूकता: **९६.५१%**
                             """

@@ -48,20 +48,38 @@ _model = None
 def load_model():
     """
     Load the Marathi NER model and pipeline lazily.
-    Caches pipeline in memory after first load.
+    Applies PyTorch dynamic 8-bit quantization and low_cpu_mem_usage for Render deployment.
 
     Returns:
         Hugging Face TokenClassificationPipeline
     """
     global _ner_pipeline, _tokenizer, _model
     if _ner_pipeline is None:
-        logger.info(f"Loading NER model: {MODEL_ID}...")
+        logger.info(f"Loading optimized NER model: {MODEL_ID}...")
+        try:
+            torch.set_num_threads(1)
+        except Exception:
+            pass
+
         try:
             _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, local_files_only=True)
-            _model = AutoModelForTokenClassification.from_pretrained(MODEL_ID, local_files_only=True)
+            raw_model = AutoModelForTokenClassification.from_pretrained(
+                MODEL_ID, local_files_only=True, low_cpu_mem_usage=True
+            )
         except Exception:
             _tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-            _model = AutoModelForTokenClassification.from_pretrained(MODEL_ID)
+            raw_model = AutoModelForTokenClassification.from_pretrained(
+                MODEL_ID, low_cpu_mem_usage=True
+            )
+
+        try:
+            # 8-bit dynamic quantization: cuts memory footprint by ~75%
+            _model = torch.quantization.quantize_dynamic(
+                raw_model, {torch.nn.Linear}, dtype=torch.qint8
+            )
+        except Exception as q_err:
+            logger.warning(f"NER Quantization fallback: {q_err}")
+            _model = raw_model
 
         _model.eval()
         _ner_pipeline = pipeline(
@@ -70,7 +88,9 @@ def load_model():
             tokenizer=_tokenizer,
             aggregation_strategy="simple",
         )
-        logger.info(f"NER model loaded successfully. Labels: {_model.config.id2label}")
+        import gc
+        gc.collect()
+        logger.info(f"Optimized NER model loaded successfully. Labels: {_model.config.id2label}")
 
     return _ner_pipeline
 

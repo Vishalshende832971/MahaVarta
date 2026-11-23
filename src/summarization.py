@@ -216,17 +216,35 @@ def load_mt5(model_name: str = MT5_MODEL_NAME) -> tuple[AutoTokenizer, AutoModel
     if _cached_mt5_tokenizer is not None and _cached_mt5_model is not None:
         return _cached_mt5_tokenizer, _cached_mt5_model
 
-    logger.info(f"Loading mT5 summariser from {model_name}...")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logger.info(f"Using device for mT5: {device}")
+    logger.info(f"Loading optimized mT5 summariser from {model_name}...")
+    try:
+        torch.set_num_threads(1)
+    except Exception:
+        pass
 
     try:
         tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=True)
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, local_files_only=True).to(device)
+        raw_model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name, local_files_only=True, low_cpu_mem_usage=True
+        )
     except Exception:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
+        raw_model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name, low_cpu_mem_usage=True
+        )
+
+    try:
+        # Quantize linear layers to 8-bit to fit in low-memory environments
+        model = torch.quantization.quantize_dynamic(
+            raw_model, {torch.nn.Linear}, dtype=torch.qint8
+        )
+    except Exception as q_err:
+        logger.warning(f"mT5 quantization fallback: {q_err}")
+        model = raw_model
+
     model.eval()
+    import gc
+    gc.collect()
 
     _cached_mt5_tokenizer = tokenizer
     _cached_mt5_model = model
