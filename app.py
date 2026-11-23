@@ -75,7 +75,27 @@ except Exception as e:
     model_load_error = f"मॉडेल लोड करताना त्रुटी (Error loading model): {str(e)}"
     logger.error(model_load_error)
 
-# Load LDA Topic Model
+# Semantic Topic Labels for LDA Topics (18 Topics discovered on L3Cube-MahaNews)
+TOPIC_LABELS = {
+    0: "न्यायालयीन घडामोडी (Courts & Legal)",
+    1: "आरोग्य व पर्यावरण (Health & Environment)",
+    2: "अर्थव्यवस्था व व्यापार (Finance & Economy)",
+    3: "आंतरराष्ट्रीय घडामोडी (International Affairs)",
+    4: "शिक्षण व प्रशासन (Education & Governance)",
+    5: "सार्वजनिक घडामोडी (Public Affairs)",
+    6: "गुन्हेगारी व पोलीस (Crime & Police)",
+    7: "वाहतूक व नागरी जीवन (Transport & Civic Life)",
+    8: "क्रीडा चर्चा व व्हिडिओ (Sports Discussions)",
+    9: "कोरोना व समाज (Pandemic & Society)",
+    10: "निवडणूक व विधानसभा (Elections & Assembly)",
+    11: "महाराष्ट्र राजकारण (Maharashtra Politics)",
+    12: "सिनेमा व मनोरंजन (Cinema & Entertainment)",
+    13: "ऑटोमोबाईल व टेक (Automobile & EV Tech)",
+    14: "करिअर व समाज (Career & Recruitment)",
+    15: "आरोग्य व जीवनशैली (Health & Wellness)",
+    16: "क्रीडा व क्रिकेट (Cricket & Sports)",
+    17: "संस्कृती व सण (Culture & Festivals)",
+}
 try:
     lda_model, lda_dict = load_lda_model()
     if lda_model is not None:
@@ -348,14 +368,16 @@ def analyze_article(input_text: str, uploaded_file, n_summary_sentences: int):
                 rows = []
                 for rank, (tid, prob) in enumerate(top3_topics, 1):
                     kw_list = [w for w, _ in lda_model.show_topic(tid, topn=6)]
+                    t_name = TOPIC_LABELS.get(tid, f"Topic {tid}")
                     rows.append({
                         "क्रमांक (Rank)": f"#{rank}",
-                        "विषय क्रमांक (Topic ID)": f"Topic {tid}",
-                        "विषय भार (Topic Weight)": f"{prob:.4f}",
+                        "विषय (Topic)": f"{t_name} (Topic {tid})",
+                        "विषय भार (Weight)": f"{prob * 100:.1f}% ({prob:.4f})",
                         "महत्त्वाचे शब्द (Top Keywords)": ", ".join(kw_list),
                     })
                 topics_df = pd.DataFrame(rows)
-                top_topic_str = f"Topic {top3_topics[0][0]} (भार: {top3_topics[0][1]:.4f})"
+                top_name = TOPIC_LABELS.get(top3_topics[0][0], f"Topic {top3_topics[0][0]}")
+                top_topic_str = f"{top_name} (भार: {top3_topics[0][1] * 100:.1f}%)"
             else:
                 topics_df = pd.DataFrame({"संदेश (Info)": ["या लेखासाठी पुरेसे विषय घटक आढळले नाहीत."]})
         else:
@@ -901,7 +923,7 @@ def build_app():
 
     /* Modern AI Studio Floating Segmented Tabs */
     .tabs > .tab-nav, div[role="tablist"], [role="tablist"] {
-        background: #e2e8f0 !important;
+        background: #f1f5f9 !important;
         padding: 5px !important;
         border-radius: 14px !important;
         border: 1px solid #cbd5e1 !important;
@@ -909,19 +931,32 @@ def build_app():
         display: flex !important;
         flex-wrap: wrap !important;
         overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
         margin-bottom: 16px !important;
     }
     .tabs > .tab-nav button, div[role="tablist"] button, [role="tablist"] button {
         background: transparent !important;
         color: #475569 !important;
         border: none !important;
-        border-radius: 10px !important;
+        border-radius: 9px !important;
         font-weight: 700 !important;
-        font-size: 0.88rem !important;
-        padding: 8px 14px !important;
+        font-size: 0.84rem !important;
+        padding: 6px 11px !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         white-space: nowrap !important;
         cursor: pointer !important;
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    /* Hide the Gradio overflow ... button so all tabs wrap cleanly on screen */
+    .tab-nav-menu,
+    button.tab-nav-menu,
+    [aria-label="More tabs"],
+    .tabs-overflow,
+    .tab-overflow {
+        display: none !important;
     }
     .tabs > .tab-nav button:hover, div[role="tablist"] button:hover {
         background: rgba(255, 255, 255, 0.7) !important;
@@ -1572,7 +1607,7 @@ def build_app():
                         )
 
                     # Tab 5: Named Entity Recognition
-                    with gr.Tab("👥 Entities NER (घटक)"):
+                    with gr.Tab("👥 Entities (घटक)"):
                         gr.Markdown("### 🔍 लेखातील नामित घटक (Extracted Named Entities in Context)")
                         gr.Markdown("*मजकुरात ओळखलेले घटक वेगवेगळ्या रंगांमध्ये हायलाइट केलेले आहेत:*")
                         ner_highlight_out = gr.HighlightedText(
@@ -1599,14 +1634,14 @@ def build_app():
                         )
                         topics_output = gr.Dataframe(
                             label="Top 3 Topics",
-                            headers=["क्रमांक (Rank)", "विषय क्रमांक (Topic ID)", "विषय भार (Topic Weight)", "महत्त्वाचे शब्द (Top Keywords)"],
+                            headers=["क्रमांक (Rank)", "विषय (Topic)", "विषय भार (Weight)", "महत्त्वाचे शब्द (Top Keywords)"],
                         )
                         gr.Markdown(
                             """
                             ---
                             **मॉडेल तपशील:**
                             - **मॉडेल:** Gensim Latent Dirichlet Allocation (LDA)
-                            - **इष्टतम विषय संख्या (Optimal K):** १८ विषय ($C_v$ सुसंगतता: ०.४८५२)
+                            - **इष्टतम विषय संख्या (Optimal K):** १८ विषय (C_v सुसंगतता Coherence: ०.४८५२ / ४८.५%)
                             - **प्रशिक्षण कॉर्पस:** L3Cube-MahaNews प्रशिक्षण डेटासेट (मराठी स्टॉपवर्ड्स फिल्टरिंगसह)
                             """
                         )
@@ -1614,14 +1649,14 @@ def build_app():
                     # Tab 7: Preprocessing (CO1 Demonstration)
                     with gr.Tab("⚙️ Preprocess (पूर्वप्रक्रिया)"):
                         gr.Markdown("### 🔬 CO1 प्रात्यक्षिक: युनिकोड नॉर्मलायझेशन, क्लीनिंग, टोकनायझेशन आणि TF-IDF")
-                        with gr.Accordion("१. मूळ मजकूर (Original Input Text)", open=False):
-                            orig_text_out = gr.Textbox(label="Original Text (Untouched for Transformers)", lines=4)
-                        with gr.Accordion("२. युनिकोड नॉर्मलाइझ केलेला मजकूर (Unicode Normalized - Indic NLP)", open=False):
-                            norm_text_out = gr.Textbox(label="Normalized Text", lines=4)
+                        with gr.Accordion("१. मूळ मजकूर (Original Input Text)", open=True):
+                            orig_text_out = gr.Textbox(label="Original Text (Untouched for Transformers)", lines=3)
+                        with gr.Accordion("२. युनिकोड नॉर्मलाइझ केलेला मजकूर (Unicode Normalized - Indic NLP)", open=True):
+                            norm_text_out = gr.Textbox(label="Normalized Text", lines=3)
                         with gr.Accordion("३. स्वच्छ केलेला मजकूर (Cleaned Text)", open=True):
-                            clean_text_out = gr.Textbox(label="Cleaned Text (HTML, URLs removed, danda kept)", lines=4)
+                            clean_text_out = gr.Textbox(label="Cleaned Text (HTML, URLs removed, danda kept)", lines=3)
                         with gr.Accordion("४. शब्द टोकन्स (Word Tokens - Indic Tokenizer)", open=True):
-                            tokens_out = gr.Textbox(label="Token List", lines=4)
+                            tokens_out = gr.Textbox(label="Token List", lines=3)
                         with gr.Accordion("५. शब्दसंग्रह सांख्यिकी (Vocabulary Statistics & TF-IDF)", open=True):
                             tfidf_sample_out = gr.Dataframe(
                                 label="Top Informative Terms by TF-IDF Weight (या लेखातील महत्त्वाचे शब्द)",
