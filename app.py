@@ -1727,6 +1727,6 @@ def build_app():
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
-    share_public = os.environ.get("SHARE", "true").lower() in ("true", "1", "yes")
+    share_public = os.environ.get("SHARE", "false").lower() in ("true", "1", "yes")
     app = build_app()
     app.launch(server_name="0.0.0.0", server_port=port, share=share_public, show_error=True)
