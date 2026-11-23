@@ -171,12 +171,47 @@ def chunk_text_spans(text: str, max_words_per_chunk: int = 100) -> list[tuple[st
     return chunks
 
 
+# Punctuation set for word-boundary snapping
+PUNCT_SPLIT = set(" \t\r\n,।॥?!.:;'\"()[]{}<>-/")
+
+# Common Marathi function words / stopwords that should never be marked as entities
+MARATHI_STOPWORDS = {
+    "दरम्यान", "दरम्यानच्या", "आणि", "यांनी", "म्हणाले", "आहेत", "नाही", "केले",
+    "यांच्या", "यांना", "याने", "त्यांनी", "त्यांचे", "आपली", "आपले", "केली", "झाले", "होते"
+}
+
+# Common Marathi inflectional and postpositional suffixes to strip for grouped entity display.
+# Single consonants like 'त' are omitted to prevent truncating proper nouns like 'भारत'.
+MARATHI_SUFFIX_STRIP = [
+    "च्यासाठी", "कडच्या", "कडचे", "पासून", "बद्दल", "विषयी", "पर्यंत",
+    "यांच्या", "यांना", "याने", "याचा", "याची", "याचे", "याच्या",
+    "हूनही", "तीलही", "साठी", "कडे", "कडून", "मध्ये", "तील", "समोर", "जवळ",
+    "शिवाय", "देखील", "च्या", "चा", "ची", "चे", "वरून", "वर", "हून",
+    "यांच्या", "यांचे", "यांचा", "यांची", "करांना", "करांचे", "करांनी", "करांचा",
+    "तील", "मधून", "तील", "ात", "ांना", "ांनी", "ंनी"
+]
+
+
+def expand_to_word_boundary(text: str, start: int, end: int) -> tuple[int, int]:
+    """
+    Snap subword character offsets to full whitespace/punctuation-delimited word boundaries.
+    Prevents subword fragment artifacts (e.g. 'सी' from 'सीता', 'ंतप्रधान' from 'पंतप्रधान').
+    """
+    while start > 0 and text[start - 1] not in PUNCT_SPLIT:
+        start -= 1
+    while end < len(text) and text[end] not in PUNCT_SPLIT:
+        end += 1
+    return start, end
+
+
 def extract_entities(text: str) -> list[dict]:
     """
-    Extract named entities from Marathi text with aggregated entity spans.
+    Extract named entities from Marathi text with word-level boundary snapping
+    and adjacent multi-word entity merging.
 
-    Handles text of arbitrary length by segmenting on sentence and word boundaries
-    without altering whitespace or character indices, ensuring exact span alignment.
+    Handles text of arbitrary length by segmenting on sentence boundaries,
+    snaps subword predictions to full words, removes isolated subword noise,
+    and merges adjacent tokens of the same entity class (e.g., 'बालेन शाह').
 
     Args:
         text: Input Marathi text string.
@@ -193,8 +228,7 @@ def extract_entities(text: str) -> list[dict]:
     # Chunk long texts cleanly preserving exact character offsets
     chunks = chunk_text_spans(text, max_words_per_chunk=100)
 
-    entities = []
-    seen_spans = set()
+    snapped_entities = []
 
     for chunk_text, chunk_offset in chunks:
         if not chunk_text.strip():
@@ -212,39 +246,89 @@ def extract_entities(text: str) -> list[dict]:
             if label in ("Other", "O", "LABEL_0"):
                 continue
 
-            ent_word = ent.get("word", "").strip()
-            # Clean subword artifact if any remains
-            ent_word = re.sub(r"^##", "", ent_word).strip()
-            if not ent_word:
-                continue
-
             abs_start = chunk_offset + int(ent["start"])
             abs_end = chunk_offset + int(ent["end"])
+            score = float(ent.get("score", 1.0))
 
-            # Verify against actual slice of text for precise boundary
-            actual_text = text[abs_start:abs_end] if abs_start < len(text) and abs_end <= len(text) else ent_word
-            display_word = actual_text if actual_text.strip() else ent_word
+            # Snap subword offsets to full word boundaries in source text
+            w_start, w_end = expand_to_word_boundary(text, abs_start, abs_end)
+            w_text = text[w_start:w_end].strip(" \t\r\n,।॥?!.:;'\"()[]{}<>-/")
 
-            span_key = (abs_start, abs_end, label)
+            # Reject empty, single-character artifacts, or common Marathi stopwords
+            if not w_text or len(w_text) <= 1 or w_text in MARATHI_STOPWORDS:
+                continue
 
-            if span_key not in seen_spans:
-                seen_spans.add(span_key)
-                entities.append({
-                    "text": display_word,
-                    "label": str(label),
-                    "score": round(float(ent.get("score", 1.0)), 4),
-                    "start": abs_start,
-                    "end": abs_end,
-                })
+            snapped_entities.append({
+                "text": w_text,
+                "label": str(label),
+                "score": round(score, 4),
+                "start": w_start,
+                "end": w_end,
+            })
 
-    # Sort entities strictly by their starting position in text
-    entities.sort(key=lambda x: (x["start"], x["end"]))
-    return entities
+    # Sort strictly by starting position
+    snapped_entities.sort(key=lambda x: (x["start"], x["end"]))
+
+    # Step 1: Deduplicate identical or overlapping word spans
+    deduped = []
+    for ent in snapped_entities:
+        if not deduped:
+            deduped.append(ent)
+            continue
+        last = deduped[-1]
+        if ent["start"] == last["start"] and ent["end"] == last["end"]:
+            # Same word: keep higher confidence label
+            if ent["score"] > last["score"]:
+                deduped[-1] = ent
+        elif ent["start"] < last["end"]:
+            # Overlapping spans: expand to outer boundary
+            last["end"] = max(last["end"], ent["end"])
+            last["text"] = text[last["start"]:last["end"]].strip(" \t\r\n,।॥?!.:;'\"()[]{}<>-/")
+            last["score"] = max(last["score"], ent["score"])
+        else:
+            deduped.append(ent)
+
+    # Step 2: Merge adjacent entities of the same class (e.g. बालेन + शाह -> बालेन शाह)
+    merged_entities = []
+    i = 0
+    while i < len(deduped):
+        curr = deduped[i]
+        j = i + 1
+        curr_start = curr["start"]
+        curr_end = curr["end"]
+        curr_label = curr["label"]
+        max_score = curr["score"]
+
+        while j < len(deduped):
+            nxt = deduped[j]
+            gap = text[curr_end:nxt["start"]]
+            gap_clean = gap.strip(" \t\r\n,।॥?!.:;'\"()[]{}<>-/")
+            # Merge if adjacent with same label and separated only by spaces/hyphens (<= 3 chars)
+            if nxt["label"] == curr_label and len(gap_clean) == 0 and len(gap) <= 3:
+                curr_end = nxt["end"]
+                max_score = max(max_score, nxt["score"])
+                j += 1
+            else:
+                break
+
+        full_text = text[curr_start:curr_end].strip(" \t\r\n,।॥?!.:;'\"()[]{}<>-/")
+        if full_text and full_text not in MARATHI_STOPWORDS:
+            merged_entities.append({
+                "text": full_text,
+                "label": curr_label,
+                "score": round(max_score, 4),
+                "start": curr_start,
+                "end": curr_end,
+            })
+        i = j
+
+    return merged_entities
 
 
 def group_by_label(entities: list[dict]) -> dict:
     """
     Group extracted entities by label, removing duplicates while preserving order.
+    Normalises trailing inflectional suffixes for clean grouped list display.
 
     Args:
         entities: List of entity dicts from extract_entities().
@@ -253,19 +337,29 @@ def group_by_label(entities: list[dict]) -> dict:
         dict mapping label -> list of unique entity text strings.
         E.g.:
         {
-            "Person": ["नरेंद्र मोदी"],
-            "Location": ["मुंबई", "पुणे"],
+            "Person": ["नरेंद्र मोदी", "बालेन शाह"],
+            "Location": ["नेपाळ", "भारत"],
             "Designation": ["पंतप्रधान"]
         }
     """
     grouped = {}
     for ent in entities:
         lbl = ent["label"]
-        txt = ent["text"]
+        raw_txt = ent["text"].strip()
+        
+        # Clean trailing postpositional suffix for grouped display
+        clean_txt = raw_txt
+        for suff in MARATHI_SUFFIX_STRIP:
+            if clean_txt.endswith(suff) and len(clean_txt) - len(suff) >= 3:
+                clean_txt = clean_txt[:-len(suff)].strip()
+                break
+
+        display_name = clean_txt if clean_txt else raw_txt
+
         if lbl not in grouped:
             grouped[lbl] = []
-        if txt not in grouped[lbl]:
-            grouped[lbl].append(txt)
+        if display_name not in grouped[lbl]:
+            grouped[lbl].append(display_name)
     return grouped
 
 

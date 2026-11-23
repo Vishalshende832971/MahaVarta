@@ -1577,7 +1577,7 @@ def build_app():
                         gr.Markdown("*मजकुरात ओळखलेले घटक वेगवेगळ्या रंगांमध्ये हायलाइट केलेले आहेत:*")
                         ner_highlight_out = gr.HighlightedText(
                             label="Entities in Context",
-                            combine_adjacent=False,
+                            combine_adjacent=True,
                         )
                         gr.Markdown("---")
                         ner_grouped_out = gr.Markdown("घटक गट येथे दिसतील.")
