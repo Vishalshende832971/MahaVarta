@@ -1679,5 +1679,6 @@ def build_app():
 # Application Entry Point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 7860))
     app = build_app()
-    app.launch(server_name="127.0.0.1", server_port=7860, show_error=True)
+    app.launch(server_name="0.0.0.0", server_port=port, show_error=True)

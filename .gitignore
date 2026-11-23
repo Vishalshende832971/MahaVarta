@@ -37,18 +37,16 @@ Thumbs.db
 *.key
 *.pem
 
-# Model weights (downloaded or trained at runtime)
+# Model weights (large transformer caches)
 models/*.pt
 models/*.bin
 models/*.safetensors
-models/*.pkl
-models/*.joblib
-models/*.gensim*
-models/*.gensim_dict*
 models/v1/
 
-# Trained classifier (can be retrained)
-models/classification_pipeline.joblib
+# Allow deployment models (TF-IDF SVM & LDA)
+!models/classification_pipeline.joblib
+!models/lda_dictionary.gensim_dict
+!models/lda_model.gensim*
 
 # Raw datasets (downloaded at runtime)
 data/*.csv
