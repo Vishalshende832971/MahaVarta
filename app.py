@@ -1421,7 +1421,6 @@ def build_app():
                     <div class="brand-text">
                         <div class="brand-title">
                             MahaVarta <span class="brand-devanagari">(महावार्ता)</span>
-                            <span class="studio-tag">AI STUDIO</span>
                         </div>
                         <div class="brand-tagline">Marathi News Intelligence &amp; Multi-Model NLP System (मराठी बातमी बुद्धिमत्ता प्रणाली) • MITAOE Alandi</div>
                     </div>
