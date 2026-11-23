@@ -218,29 +218,22 @@ def load_mt5(model_name: str = MT5_MODEL_NAME) -> tuple[AutoTokenizer, AutoModel
 
     logger.info(f"Loading optimized mT5 summariser from {model_name}...")
     try:
-        torch.set_num_threads(1)
+        import os
+        num_threads = min(4, os.cpu_count() or 4)
+        torch.set_num_threads(num_threads)
     except Exception:
         pass
 
     try:
         tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=True)
-        raw_model = AutoModelForSeq2SeqLM.from_pretrained(
+        model = AutoModelForSeq2SeqLM.from_pretrained(
             model_name, local_files_only=True, low_cpu_mem_usage=True
         )
     except Exception:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        raw_model = AutoModelForSeq2SeqLM.from_pretrained(
+        model = AutoModelForSeq2SeqLM.from_pretrained(
             model_name, low_cpu_mem_usage=True
         )
-
-    try:
-        # Quantize linear layers to 8-bit to fit in low-memory environments
-        model = torch.quantization.quantize_dynamic(
-            raw_model, {torch.nn.Linear}, dtype=torch.qint8
-        )
-    except Exception as q_err:
-        logger.warning(f"mT5 quantization fallback: {q_err}")
-        model = raw_model
 
     model.eval()
     import gc
@@ -312,9 +305,9 @@ def chunk_sentences(
 
 def mt5_summary(
     text: str,
-    max_length: int = 84,
-    min_length: int = 30,
-    num_beams: int = 4,
+    max_length: int = 75,
+    min_length: int = 25,
+    num_beams: int = 2,
     length_penalty: float = 1.0,
     no_repeat_ngram_size: int = 2,
     model_name: str = MT5_MODEL_NAME,
@@ -363,11 +356,11 @@ def mt5_summary(
     input_token_count = len(raw_tokens)
     truncated = input_token_count > 512
 
-    # Tokenize with 512 max length and padding
+    # Tokenize with 512 max length and dynamic padding for maximum speed
     inputs = tokenizer(
         [cleaned_text],
         return_tensors="pt",
-        padding="max_length",
+        padding=False,
         truncation=True,
         max_length=512,
     ).to(device)
@@ -382,6 +375,8 @@ def mt5_summary(
             num_beams=num_beams,
             length_penalty=length_penalty,
             no_repeat_ngram_size=no_repeat_ngram_size,
+            use_cache=True,
+            early_stopping=True,
         )
 
     summary = tokenizer.decode(

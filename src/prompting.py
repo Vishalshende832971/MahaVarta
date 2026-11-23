@@ -86,6 +86,11 @@ def load_qwen(model_name: str = QWEN_MODEL_NAME) -> tuple[AutoTokenizer, AutoMod
         return _cached_qwen_tokenizer, _cached_qwen_model
 
     logger.info(f"Loading Qwen model from {model_name}...")
+    try:
+        num_threads = min(4, os.cpu_count() or 4)
+        torch.set_num_threads(num_threads)
+    except Exception:
+        pass
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # FP32 is native on x86 CPU and avoids missing bfloat16 kernel issues on Windows
     chosen_dtype = torch.float32
@@ -121,7 +126,7 @@ def strip_thinking_tokens(text: str) -> str:
 def truncate_article_at_sentence(
     article: str,
     tokenizer,
-    max_tokens: int = 1500,
+    max_tokens: int = 450,
 ) -> tuple[str, bool]:
     """
     Truncate article text at a sentence boundary if it exceeds max_tokens.
@@ -129,7 +134,7 @@ def truncate_article_at_sentence(
     Args:
         article: Raw input text.
         tokenizer: Hugging Face tokenizer.
-        max_tokens: Maximum allowed token threshold (default: 1500).
+        max_tokens: Maximum allowed token threshold (default: 450).
 
     Returns:
         tuple: (truncated_text, is_truncated)
@@ -162,7 +167,7 @@ def truncate_article_at_sentence(
 def generate_brief(
     article: str,
     prompt_key: str,
-    max_new_tokens: int = 300,
+    max_new_tokens: int = 140,
     model_name: str = QWEN_MODEL_NAME,
 ) -> dict:
     """
@@ -172,7 +177,7 @@ def generate_brief(
     Args:
         article: Input Marathi news text.
         prompt_key: Key from PROMPTS ("zero_shot", "role_based", "role_constraints").
-        max_new_tokens: Maximum tokens to generate (default: 300).
+        max_new_tokens: Maximum tokens to generate (default: 140).
         model_name: Model identifier.
 
     Returns:
@@ -197,8 +202,8 @@ def generate_brief(
     tokenizer, model = load_qwen(model_name)
     device = next(model.parameters()).device
 
-    # Truncate at sentence boundary if article > 1500 tokens
-    proc_article, truncated_input = truncate_article_at_sentence(article, tokenizer, max_tokens=1500)
+    # Truncate at sentence boundary to keep lead context crisp and fast (~450 tokens)
+    proc_article, truncated_input = truncate_article_at_sentence(article, tokenizer, max_tokens=450)
 
     # Format prompt text
     prompt_template = PROMPTS[prompt_key]
@@ -222,11 +227,19 @@ def generate_brief(
             add_generation_prompt=True,
         )
 
+    # Ensure thinking tag is closed so model does not spend tokens generating reasoning
+    if "<think>" not in prompt_text and "</think>" not in prompt_text:
+        prompt_text = prompt_text.rstrip()
+        if prompt_text.endswith("<|im_start|>assistant"):
+            prompt_text += "\n<think>\n\n</think>\n\n"
+        elif not prompt_text.endswith("</think>"):
+            prompt_text += "\n<think>\n\n</think>\n\n"
+
     # Tokenize input prompt
     model_inputs = tokenizer([prompt_text], return_tensors="pt").to(device)
     input_token_count = model_inputs["input_ids"].shape[1]
 
-    # Generate with deterministic settings (do_sample=False)
+    # Generate with deterministic settings (do_sample=False) and KV-cache enabled
     with torch.no_grad():
         generated_ids = model.generate(
             **model_inputs,
@@ -235,6 +248,7 @@ def generate_brief(
             temperature=None,
             top_p=None,
             top_k=None,
+            use_cache=True,
         )
 
     # Slice off the input tokens to get strictly new generated tokens

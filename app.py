@@ -544,7 +544,7 @@ def handle_news_brief(text: str, prompt_variant: str):
             txt3, badge3 = format_card(res_all.get("role_constraints", {}))
             return txt1, badge1, txt2, badge2, txt3, badge3
         else:
-            res = generate_brief(text, prompt_key=prompt_variant, max_new_tokens=250)
+            res = generate_brief(text, prompt_key=prompt_variant, max_new_tokens=140)
             out_txt, badge = format_card(res)
             not_sel = "*(या पर्यायाची निवड केलेली नाही - Not selected)*"
             not_sel_b = ""
@@ -1490,10 +1490,10 @@ def build_app():
 
                                 with gr.Accordion("⚙️ mT5 जनरेशन पॅरामीटर्स (Generation Controls)", open=False):
                                     with gr.Row():
-                                        mt5_max_len = gr.Slider(minimum=50, maximum=300, value=150, step=5, label="Max Length (कमाल लांबी)")
-                                        mt5_min_len = gr.Slider(minimum=20, maximum=150, value=50, step=5, label="Min Length (किमान लांबी)")
+                                        mt5_max_len = gr.Slider(minimum=30, maximum=250, value=75, step=5, label="Max Length (कमाल लांबी)")
+                                        mt5_min_len = gr.Slider(minimum=15, maximum=100, value=25, step=5, label="Min Length (किमान लांबी)")
                                     with gr.Row():
-                                        mt5_beams = gr.Slider(minimum=1, maximum=8, value=4, step=1, label="Num Beams")
+                                        mt5_beams = gr.Slider(minimum=1, maximum=8, value=2, step=1, label="Num Beams")
                                         mt5_len_penalty = gr.Slider(minimum=0.5, maximum=2.0, value=1.0, step=0.1, label="Length Penalty")
                                         mt5_ngram_size = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="No Repeat N-gram")
 
