@@ -950,13 +950,36 @@ def build_app():
         visibility: visible !important;
         opacity: 1 !important;
     }
-    /* Hide the Gradio overflow ... button so all tabs wrap cleanly on screen */
+    /* Gradio Tab Overflow (...) Menu Button */
     .tab-nav-menu,
     button.tab-nav-menu,
     [aria-label="More tabs"],
     .tabs-overflow,
     .tab-overflow {
-        display: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 9px !important;
+        padding: 5px 12px !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+        transition: all 0.2s ease !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    .tab-nav-menu:hover,
+    button.tab-nav-menu:hover,
+    [aria-label="More tabs"]:hover,
+    .tabs-overflow:hover,
+    .tab-overflow:hover {
+        background: #eef2ff !important;
+        color: #4338ca !important;
+        border-color: #818cf8 !important;
     }
     .tabs > .tab-nav button:hover, div[role="tablist"] button:hover {
         background: rgba(255, 255, 255, 0.7) !important;
@@ -971,15 +994,11 @@ def build_app():
     }
 
     /* Tab Overflow Menu Popup (...) & All Dropdown Menus */
-    .tab-nav-menu,
-    button.tab-nav-menu,
     .tab-nav-menu-wrapper,
     .tab-nav-menu-list,
     .tab-nav-dropdown,
-    .tabs-overflow,
-    .tab-overflow,
-    .tab-nav > div,
-    .tab-nav > ul,
+    .tab-nav > div[role="menu"],
+    .tab-nav > ul[role="menu"],
     nav[role="tablist"] + div,
     nav[role="tablist"] ~ div,
     nav[role="tablist"] ul,
@@ -992,16 +1011,15 @@ def build_app():
     .dropdown-content,
     .dropdown-options,
     .options,
-    [data-testid*="overflow"],
+    [data-testid*="overflow-menu"],
     [data-testid*="tab-menu"],
-    [data-testid*="dropdown"],
     div[style*="position: absolute"] > ul,
     div[style*="position: absolute"] > div {
         background-color: #ffffff !important;
         background: #ffffff !important;
         border: 1.5px solid #cbd5e1 !important;
         border-radius: 12px !important;
-        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14) !important;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16) !important;
         color: #0f172a !important;
         z-index: 99999 !important;
         padding: 6px !important;
