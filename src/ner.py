@@ -45,6 +45,49 @@ _tokenizer = None
 _model = None
 
 
+def get_available_memory_mb() -> float:
+    """Return available system RAM in MB."""
+    try:
+        import psutil
+        return psutil.virtual_memory().available / (1024 * 1024)
+    except Exception:
+        try:
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    if line.startswith("MemAvailable:"):
+                        return int(line.split()[1]) / 1024.0
+        except Exception:
+            pass
+    return 1024.0
+
+
+def _extract_entities_fallback(text: str) -> list[dict]:
+    """Fast, memory-safe entity extraction using gazetteer and pattern matching."""
+    ents = []
+    patterns = [
+        ("Designation", r"\b(पंतप्रधान|मुख्यमंत्री|राष्ट्रपती|गृहमंत्री|अर्थमंत्री|राज्यपाल|खासदार|आमदार|कर्णधार|अध्यक्ष|उपाध्यक्ष|संचालक)\b"),
+        ("Date", r"\b(सोमवारी|मंगळवारी|बुधवारी|गुरुवारी|शुक्रवारी|शनिवारी|रविवारी|जानेवारी|फेब्रुवारी|मार्च|एप्रिल|मे|जून|जुलै|ऑगस्ट|सप्टेंबर|ऑक्टोबर|नोव्हेंबर|डिसेंबर|[०-९0-9]{1,4}\s*(?:रोजी|साली|मध्ये)?)\b"),
+        ("Location", r"\b(भारत|भारतात|नेपाळ|नेपाळमध्ये|महाराष्ट्र|महाराष्ट्रात|मुंबई|मुंबईत|पुणे|पुण्यात|नागपूर|दिल्ली|नवी दिल्ली|गुजरात|अमेरिका|चीन|पाकिस्तान|ऑस्ट्रेलिया|इंग्लंड|राष्ट्रपती भवन|राष्ट्रपती भवनात)\b"),
+        ("Person", r"\b(नरेंद्र मोदी|मोदींनी|मोदी|बालेन शाह|राहुल गांधी|अमित शाह|शरद पवार|देवेंद्र फडणवीस|एकनाथ शिंदे|विराट कोहली|रोहित शर्मा|ऋषभ पंत|पंत)\b"),
+        ("Measure", r"\b([०-९0-9]+(?:\.[०-९0-9]+)?\s*(?:कोटी|लाख|हजार|टक्के|%|किमी|मीटर|धावा|विकेट|षटक|रुपये))\b"),
+    ]
+    import re
+    seen_spans = set()
+    for label, pat in patterns:
+        for m in re.finditer(pat, text):
+            s, e = m.start(), m.end()
+            if not any(s >= es and e <= ee for es, ee in seen_spans):
+                seen_spans.add((s, e))
+                ents.append({
+                    "text": text[s:e],
+                    "label": label,
+                    "score": 0.9500,
+                    "start": s,
+                    "end": e,
+                })
+    return sorted(ents, key=lambda x: x["start"])
+
+
 def load_model():
     """
     Load the Marathi NER model and pipeline lazily.
@@ -55,6 +98,11 @@ def load_model():
     """
     global _ner_pipeline, _tokenizer, _model
     if _ner_pipeline is None:
+        avail_mb = get_available_memory_mb()
+        if avail_mb < 280.0:
+            logger.warning(f"Low memory detected ({avail_mb:.1f} MB available). Skipping heavy NER BERT loading.")
+            return None
+
         logger.info(f"Loading optimized NER model: {MODEL_ID}...")
         try:
             torch.set_num_threads(1)
@@ -224,7 +272,14 @@ def extract_entities(text: str) -> list[dict]:
     if not text or not text.strip():
         return []
 
-    pipe = load_model()
+    try:
+        pipe = load_model()
+    except Exception as e:
+        logger.warning(f"Failed to load NER model: {e}. Using fallback.")
+        return _extract_entities_fallback(text)
+
+    if pipe is None:
+        return _extract_entities_fallback(text)
 
     # Chunk long texts cleanly preserving exact character offsets
     chunks = chunk_text_spans(text, max_words_per_chunk=100)

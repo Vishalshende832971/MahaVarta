@@ -58,6 +58,54 @@ _tokenizer = None
 _model = None
 
 
+def get_available_memory_mb() -> float:
+    """Return available system RAM in MB."""
+    try:
+        import psutil
+        return psutil.virtual_memory().available / (1024 * 1024)
+    except Exception:
+        try:
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    if line.startswith("MemAvailable:"):
+                        return int(line.split()[1]) / 1024.0
+        except Exception:
+            pass
+    return 1024.0
+
+
+def _predict_lexicon_fallback(text: str) -> dict:
+    """Fast, memory-safe sentiment prediction using domain lexicon and sentence valence."""
+    words = set(text.replace(":", " ").replace(",", " ").replace(".", " ").replace("।", " ").split())
+    pos_hits = len(words.intersection(MARATHI_POS_WORDS))
+    neg_hits = len(words.intersection(MARATHI_NEG_WORDS))
+
+    if neg_hits > pos_hits:
+        neg_p = min(0.92, 0.58 + neg_hits * 0.08)
+        neu_p = round((1.0 - neg_p) * 0.7, 4)
+        pos_p = round(1.0 - neg_p - neu_p, 4)
+        return {
+            "label": "Negative",
+            "score": round(neg_p, 4),
+            "all_scores": {"Negative": round(neg_p, 4), "Neutral": neu_p, "Positive": pos_p},
+        }
+    elif pos_hits > neg_hits:
+        pos_p = min(0.90, 0.55 + pos_hits * 0.08)
+        neu_p = round((1.0 - pos_p) * 0.7, 4)
+        neg_p = round(1.0 - pos_p - neu_p, 4)
+        return {
+            "label": "Positive",
+            "score": round(pos_p, 4),
+            "all_scores": {"Positive": round(pos_p, 4), "Neutral": neu_p, "Negative": neg_p},
+        }
+    else:
+        return {
+            "label": "Neutral",
+            "score": 0.6850,
+            "all_scores": {"Neutral": 0.6850, "Positive": 0.1650, "Negative": 0.1500},
+        }
+
+
 def load_model():
     """
     Load the pretrained Marathi sentiment tokenizer and model lazily.
@@ -68,6 +116,11 @@ def load_model():
     """
     global _tokenizer, _model
     if _tokenizer is None or _model is None:
+        avail_mb = get_available_memory_mb()
+        if avail_mb < 280.0:
+            logger.warning(f"Low memory detected ({avail_mb:.1f} MB available). Skipping heavy BERT sentiment loading.")
+            return None, None
+
         logger.info(f"Loading optimized sentiment model: {MODEL_ID}...")
         try:
             torch.set_num_threads(1)
@@ -122,18 +175,21 @@ def predict(text: str) -> dict:
           - "all_scores": dict mapping every label name to its prediction score
     """
     if not text or not text.strip():
-        # Handle empty/whitespace input gracefully
-        tokenizer, model = load_model()
-        id2label = model.config.id2label
-        all_zero = {str(label): 0.0 for label in id2label.values()}
-        default_label = id2label.get(1, list(id2label.values())[0])
         return {
-            "label": str(default_label),
+            "label": "Neutral",
             "score": 0.0,
-            "all_scores": all_zero,
+            "all_scores": {"Negative": 0.0, "Neutral": 0.0, "Positive": 0.0},
         }
 
-    tokenizer, model = load_model()
+    try:
+        tokenizer, model = load_model()
+    except Exception as e:
+        logger.warning(f"Failed to load sentiment model: {e}. Using lexicon fallback.")
+        return _predict_lexicon_fallback(text)
+
+    if tokenizer is None or model is None:
+        return _predict_lexicon_fallback(text)
+
     id2label = model.config.id2label
 
     sents = split_sentences(text)
