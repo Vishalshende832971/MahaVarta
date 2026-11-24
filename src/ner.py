@@ -77,6 +77,7 @@ def load_model():
             _model = torch.quantization.quantize_dynamic(
                 raw_model, {torch.nn.Linear}, dtype=torch.qint8
             )
+            del raw_model
         except Exception as q_err:
             logger.warning(f"NER Quantization fallback: {q_err}")
             _model = raw_model
